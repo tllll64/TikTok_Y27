@@ -300,6 +300,7 @@ function PhoneContent({ current, demo }) {
         bgTexts={demo.bgTexts}
         videoFit={demo.videoFit ?? 'cover'}
         videoScale={demo.videoScale ?? 1}
+        videoOffsetY={demo.videoOffsetY ?? 0}
         plusOneTextSet={new Set((demo.danmakus ?? []).filter(d => d.plusOne).map(d => d.text))}
         disclaimerMaskHeight={demo.disclaimerMaskHeight ?? 0}
       />

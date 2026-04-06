@@ -1139,7 +1139,7 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
 }
 
 // --- Main Page Component ---
-export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, plusOneTextSet, disclaimerMaskHeight = 0 }) {
+export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0 }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
@@ -1233,7 +1233,10 @@ export default function TikTokHome({ className, videoSrc, username, description,
       {/* Background video */}
       <div style={{
         position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-        ...(videoScale !== 1 ? { transform: `translateY(52px) scale(${videoScale})`, transformOrigin: 'top center' } : {}),
+        ...(videoScale !== 1 || videoOffsetY !== 0 ? {
+          transform: `${videoOffsetY !== 0 ? `translateY(${videoOffsetY}px) ` : ''}scale(${videoScale})`,
+          transformOrigin: 'center center',
+        } : {}),
       }}>
         <video
           ref={videoRef}

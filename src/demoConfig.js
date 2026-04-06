@@ -160,6 +160,7 @@ const DEMOS = [
     description: '从夯到拉 锐评一下奶茶店#从夯到拉排名#内容过于真实#夯爆了',
     captionOffset: 0,
     videoScale: 0.8,
+    videoOffsetY: -8,
     disclaimerMaskHeight: 200,
     danmakus: [
       { text: '夯', row: 0 },
@@ -207,6 +208,7 @@ const DEMOS = [
     description: '所有人Lets接接接#演唱会抢票',
     captionOffset: 24,
     videoScale: 0.7,
+    videoOffsetY: -12,
     danmakus: [
       { text: '接接接', row: 0 },
       { text: '接接接', row: 0 },
