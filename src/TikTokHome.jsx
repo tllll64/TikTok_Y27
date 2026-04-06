@@ -455,8 +455,10 @@ function DanmakuOffIcon() {
 }
 
 // Danmaku input panel (slides up from bottom)
-function DanmakuPanel({ onClose, onSend, danmakuOn, onToggleDanmaku }) {
-  const [text, setText] = useState('');
+// text / onTextChange are controlled from parent — no internal text state needed
+// Closing is handled by the parent container's onClick (tap-outside); clicks within the
+// panel call stopPropagation so they don't bubble up and accidentally dismiss it.
+function DanmakuPanel({ onSend, danmakuOn, onToggleDanmaku, text, onTextChange }) {
   const inputRef = useRef(null);
 
   // 用 preventScroll 阻止浏览器自动滚动页面
@@ -468,18 +470,16 @@ function DanmakuPanel({ onClose, onSend, danmakuOn, onToggleDanmaku }) {
   }, []);
 
   return (
-    <>
-      {/* Tap-outside overlay (no dim per design) */}
-      <div className="absolute inset-0" onClick={onClose} />
-
-      {/* Slide-up panel */}
-      <motion.div
-        className="absolute left-0 bottom-0 w-[390px]"
-        initial={{ y: 347 }}
-        animate={{ y: 0 }}
-        exit={{ y: 347 }}
-        transition={{ type: 'tween', ease: [0.25, 0.46, 0.45, 0.94], duration: 0.28 }}
-      >
+    /* Slide-up panel — stopPropagation keeps all in-panel clicks from bubbling to the
+       parent container's tap-outside handler */
+    <motion.div
+      className="absolute left-0 bottom-0 w-[390px]"
+      initial={{ y: 347 }}
+      animate={{ y: 0 }}
+      exit={{ y: 347 }}
+      transition={{ type: 'tween', ease: [0.25, 0.46, 0.45, 0.94], duration: 0.28 }}
+      onClick={e => e.stopPropagation()}
+    >
         {/* Input bar — 56px white */}
         <div className="relative w-full bg-white" style={{ height: 56 }}>
           {/* Top border */}
@@ -505,7 +505,7 @@ function DanmakuPanel({ onClose, onSend, danmakuOn, onToggleDanmaku }) {
               <input
                 ref={inputRef}
                 value={text}
-                onChange={e => setText(e.target.value)}
+                onChange={e => onTextChange(e.target.value)}
                 placeholder="发一条友好的弹幕吧"
                 className="flex-1 bg-transparent outline-none border-none text-[14px] min-w-0"
                 style={{
@@ -523,6 +523,7 @@ function DanmakuPanel({ onClose, onSend, danmakuOn, onToggleDanmaku }) {
             <AnimatePresence>
               {text.trim() && (
                 <motion.button
+                  key="send-btn"
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: 50 }}
                   exit={{ opacity: 0, width: 0 }}
@@ -558,8 +559,7 @@ function DanmakuPanel({ onClose, onSend, danmakuOn, onToggleDanmaku }) {
 
         {/* iOS Keyboard — purely visual, real input from computer keyboard */}
         <IOSKeyboard />
-      </motion.div>
-    </>
+    </motion.div>
   );
 }
 
@@ -697,7 +697,7 @@ const BG_TEXTS = [
 ];
 const ROW_TOPS = [110, 135, 160];
 const ITEM_DURATION = 13.34;  // 每条弹幕滚动秒数（原10.67s × 1/0.8）
-const FIRE_INTERVAL = 2.07;  // 每行每隔几秒发射下一条（~48px间距）
+const MIN_GAP = 48;           // 相邻弹幕最小间距 px
 
 // 弹幕点击后的弹出菜单
 const HEART_PATH = "M11.9949 21.5575C12.3018 21.5575 12.7621 21.312 13.1714 21.0358C18.5115 17.5575 22 13.4348 22 9.28133C22 5.53708 19.4015 3 16.2506 3C14.4229 3 13.0558 3.93892 12.1823 5.34696C12.0981 5.48267 11.8935 5.48167 11.8103 5.34534C10.952 3.9382 9.57636 3 7.74936 3C4.59847 3 2 5.53708 2 9.28133C2 13.4348 5.48849 17.5575 10.8286 21.0358C11.2379 21.312 11.688 21.5575 11.9949 21.5575Z";
@@ -749,7 +749,7 @@ const POPOVER_MENU_ITEMS = [
   { Icon: ReplyIcon, label: '回复' },
 ];
 
-function DanmakuPopover({ left, top, arrowLeft, onLike, currentLikeCount, baseCount }) {
+function DanmakuPopover({ left, top, arrowLeft, onLike, onFollowSend, currentLikeCount, baseCount }) {
   return (
     <div
       style={{
@@ -777,7 +777,7 @@ function DanmakuPopover({ left, top, arrowLeft, onLike, currentLikeCount, baseCo
           const liked = isLikeBtn && currentLikeCount > baseCount;
           return (
             <div key={label}
-              onClick={isLikeBtn ? onLike : undefined}
+              onClick={isLikeBtn ? onLike : label === '跟发' ? onFollowSend : undefined}
               style={{
                 width: 52, height: 70,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -812,12 +812,17 @@ function DanmakuPopover({ left, top, arrowLeft, onLike, currentLikeCount, baseCo
 }
 
 // 单条弹幕 — likeCount is 1 when liked, 0 when not
-function DanmakuItem({ text, isUser, myKey, activeKey, likeCount, baseCount, onItemClick, onEnd }) {
+function DanmakuItem({ text, isUser, myKey, activeKey, likeCount, baseCount, onItemClick, onEnd, onMeasure }) {
   const isLiked = likeCount > 0;
   const isActive = activeKey === myKey;
   const dimmed = !!activeKey && !isActive;
+  const spanRef = useRef(null);
+  useEffect(() => {
+    if (spanRef.current) onMeasure?.(spanRef.current.offsetWidth);
+  }, []);
   return (
     <span
+      ref={spanRef}
       style={{
         position: 'absolute',
         left: 0,
@@ -850,7 +855,7 @@ function DanmakuItem({ text, isUser, myKey, activeKey, likeCount, baseCount, onI
         pointerEvents: 'auto',
         cursor: 'pointer',
       }}
-      onClick={e => { e.stopPropagation(); onItemClick(e, myKey); }}
+      onClick={e => { e.stopPropagation(); onItemClick(e, myKey, text); }}
       onAnimationEnd={onEnd}
     >
       {text}
@@ -867,47 +872,87 @@ function DanmakuItem({ text, isUser, myKey, activeKey, likeCount, baseCount, onI
 function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts }) {
   const [active, setActive] = useState([]);
   const bgIndex = useRef(0);
-  // 待发射的用户弹幕队列
   const userQueue = useRef([]);
-  // 已入队的用户弹幕 ID 集合（防止重复入队）
   const enqueuedIds = useRef(new Set());
+  const fireTimerRef = useRef(null);
+  const lastFiredKeyRef = useRef(null);
+  const lastFireTimeRef = useRef(0);    // timestamp of last fire
+  const lastFiredWidthRef = useRef(90); // measured width of last fired danmaku
+  // fireRef holds the latest fire fn so setTimeout closure never goes stale
+  const fireRef = useRef(null);
 
-  // 新用户弹幕加入队列
   useEffect(() => {
+    let hasUserSend = false;
     pendingUser.forEach(d => {
       if (!enqueuedIds.current.has(d.id)) {
         enqueuedIds.current.add(d.id);
-        userQueue.current.push(d);
+        if (d.isPreset) {
+          // 预设弹幕排到队列末尾，随背景节奏发射
+          userQueue.current.push(d);
+        } else {
+          // 用户手动发送：插到队列最前，尽快发射
+          userQueue.current.unshift(d);
+          hasUserSend = true;
+        }
       }
     });
+    if (hasUserSend) {
+      // 计算距上次发射已过了多久，推算最早可安全发射的时刻
+      const speed = 890 / ITEM_DURATION;
+      const elapsed = Date.now() - lastFireTimeRef.current;
+      const needed = (lastFiredWidthRef.current + MIN_GAP) / speed * 1000;
+      const waitMore = Math.max(50, needed - elapsed);
+      clearTimeout(fireTimerRef.current);
+      fireTimerRef.current = setTimeout(() => fireRef.current?.(), waitMore);
+    }
   }, [pendingUser]);
 
-  // 定时发射：每 FIRE_INTERVAL 秒发一条，行间错开初始延迟
-  useEffect(() => {
-    function fire() {
-      let entry;
-      const baseCount = Math.floor(Math.random() * 81) + 20; // 20–100
-      if (userQueue.current.length > 0) {
-        const u = userQueue.current.shift();
-        entry = { key: `u-${u.id}`, text: u.text, isUser: !u.isPreset, origId: u.id, baseCount };
-      } else {
-        const pool = bgTexts ?? BG_TEXTS[rowIndex];
-        const txt = pool[bgIndex.current % pool.length];
-        bgIndex.current++;
-        entry = { key: `bg-${rowIndex}-${Date.now()}`, text: txt, isUser: false, baseCount };
-      }
-      onRegister?.(entry.key, baseCount);
-      setActive(prev => [...prev, entry]);
+  // Always keep fireRef.current up-to-date with latest props/state
+  fireRef.current = () => {
+    let entry;
+    const baseCount = Math.floor(Math.random() * 81) + 20;
+    if (userQueue.current.length > 0) {
+      const u = userQueue.current.shift();
+      entry = { key: `u-${u.id}`, text: u.text, isUser: !u.isPreset, origId: u.id, baseCount };
+    } else {
+      const pool = bgTexts ?? BG_TEXTS[rowIndex];
+      const txt = pool[bgIndex.current % pool.length];
+      bgIndex.current++;
+      entry = { key: `bg-${rowIndex}-${Date.now()}`, text: txt, isUser: false, baseCount };
     }
+    onRegister?.(entry.key, baseCount);
+    lastFiredKeyRef.current = entry.key;
+    lastFireTimeRef.current = Date.now();
+    setActive(prev => [...prev, entry]);
+    // Schedule next fire using estimated width (will be corrected by onMeasure)
+    scheduleNext(estimateWidth(entry.text, entry.isUser));
+  };
 
-    // 每行错开 rowIndex 秒启动，避免三行同时发射
-    const init = setTimeout(() => {
-      fire();
-      const interval = setInterval(fire, FIRE_INTERVAL * 1000);
-      return () => clearInterval(interval);
-    }, rowIndex * 1000);
+  function estimateWidth(text, isUser) {
+    // Chinese chars ≈ 15px each at fontSize:15 fontWeight:500; +16px for user pill padding
+    return text.length * 15 + (isUser ? 16 : 0);
+  }
 
-    return () => clearTimeout(init);
+  function scheduleNext(width) {
+    const speed = 890 / ITEM_DURATION; // px/s
+    const delay = Math.max(500, (width + MIN_GAP) / speed * 1000);
+    clearTimeout(fireTimerRef.current);
+    fireTimerRef.current = setTimeout(() => fireRef.current?.(), delay);
+  }
+
+  // Called by DanmakuItem once it mounts and reports its real rendered width
+  function handleMeasure(key, width) {
+    if (key !== lastFiredKeyRef.current) return;
+    lastFiredWidthRef.current = width;
+    scheduleNext(width);
+  }
+
+  useEffect(() => {
+    const init = setTimeout(() => fireRef.current?.(), rowIndex * 1000);
+    return () => {
+      clearTimeout(init);
+      clearTimeout(fireTimerRef.current);
+    };
   }, []);
 
   function remove(key, origId) {
@@ -926,8 +971,9 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
           activeKey={activeKey}
           likeCount={likeMap?.[item.key] ? 1 : 0}
           baseCount={item.baseCount}
-          onItemClick={(e, key) => onItemClick(e, key, rowIndex)}
+          onItemClick={(e, key, text) => onItemClick(e, key, rowIndex, text)}
           onEnd={() => remove(item.key, item.origId)}
+          onMeasure={w => handleMeasure(item.key, w)}
         />
       ))}
     </div>
@@ -935,7 +981,9 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 }
 
 // Danmaku overlay — 3 独立行轨道，统一调度背景 + 用户弹幕
-function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts }) {
+// panelOpen=true 时将容器切换为 pointer-events:auto 并 stopPropagation，
+// 防止弹幕区域内的空白点击冒泡到主容器导致面板意外关闭。
+function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false }) {
   return (
     <>
       <style>{`
@@ -945,8 +993,10 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
         }
       `}</style>
       <div
-        className="absolute pointer-events-none"
-        style={{ top: 0, left: 0, width: 390, height: 200, zIndex: 10 }}
+        className="absolute"
+        style={{ top: 0, left: 0, width: 390, height: 200, zIndex: 10,
+                 pointerEvents: panelOpen ? 'auto' : 'none' }}
+        onClick={panelOpen ? e => e.stopPropagation() : undefined}
       >
         {[0, 1, 2].map(ri => (
           <DanmakuRowTrack
@@ -975,8 +1025,10 @@ export default function TikTokHome({ className, videoSrc, username, description,
   const [userDanmakus, setUserDanmakus] = useState(
     presetDanmakus.map(d => ({ id: crypto.randomUUID(), text: d.text, row: d.row ?? 0, isPreset: true }))
   );
-  const [danmakuPopup, setDanmakuPopup] = useState(null); // { key, left, top, arrowLeft }
+  const [danmakuPopup, setDanmakuPopup] = useState(null); // { key, left, top, arrowLeft, text }
+  const [panelText, setPanelText] = useState('');         // controlled text for the input panel
   const [danmakuLikes, setDanmakuLikes] = useState({});  // { [key]: count }
+
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const popupTimerRef = useRef(null);
@@ -987,6 +1039,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
     const id = crypto.randomUUID();
     const row = Math.floor(Math.random() * 3); // random row 0-2
     setUserDanmakus(prev => [...prev, { id, text, row }]);
+    setPanelText('');
     setDanmakuOpen(false);
   }
 
@@ -1011,7 +1064,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
     popupTimerRef.current = setTimeout(dismissPopup, 6000);
   }
 
-  function handleDanmakuClick(e, key, rowIndex) {
+  function handleDanmakuClick(e, key, rowIndex, text) {
     e.stopPropagation();
     if (danmakuPopup?.key === key) { dismissPopup(); return; }
     const containerRect = containerRef.current.getBoundingClientRect();
@@ -1022,8 +1075,14 @@ export default function TikTokHome({ className, videoSrc, username, description,
     const arrowLeft = Math.max(8, Math.min(256 - 28, itemCenterX - popupLeft - 10));
     const popupTop = ROW_TOPS[rowIndex] + 25 + 4;
     const baseCount = itemBaseCountRef.current[key] || (Math.floor(Math.random() * 81) + 20);
-    setDanmakuPopup({ key, left: popupLeft, top: popupTop, arrowLeft, baseCount });
+    setDanmakuPopup({ key, left: popupLeft, top: popupTop, arrowLeft, baseCount, text });
     scheduleAutoDismiss();
+  }
+
+  function handleFollowSend(text) {
+    dismissPopup();
+    setPanelText(text);
+    setDanmakuOpen(true);
   }
 
   return (
@@ -1032,7 +1091,12 @@ export default function TikTokHome({ className, videoSrc, username, description,
       className={className || "bg-black relative overflow-hidden"}
       style={{ width: 390, height: 844 }}
       data-name="首页 - 简洁"
-      onClick={() => danmakuPopup && dismissPopup()}
+      onClick={() => {
+        // 点击弹幕区域外的视频区域：关闭面板 + 关闭弹出菜单
+        // 弹幕区域内的点击已被 DanmakuOverlay 容器的 stopPropagation 拦截，不会到达这里
+        if (danmakuOpen) setDanmakuOpen(false);
+        if (danmakuPopup) dismissPopup();
+      }}
     >
       {/* Background video */}
       <video
@@ -1095,6 +1159,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
           likeMap={danmakuLikes}
           onRegister={(key, bc) => { itemBaseCountRef.current[key] = bc; }}
           bgTexts={bgTexts}
+          panelOpen={danmakuOpen}
         />
       )}
 
@@ -1105,6 +1170,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
           top={danmakuPopup.top}
           arrowLeft={danmakuPopup.arrowLeft}
           onLike={handleLike}
+          onFollowSend={() => handleFollowSend(danmakuPopup.text)}
           baseCount={danmakuPopup.baseCount || 20}
           currentLikeCount={(danmakuPopup.baseCount || 20) + (danmakuLikes[danmakuPopup.key] ? 1 : 0)}
         />
@@ -1117,7 +1183,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
       <Caption username={username} description={description} topOffset={captionOffset} />
 
       {/* Danmaku input button */}
-      <DanmakuButton onClick={() => setDanmakuOpen(true)} topOffset={captionOffset} />
+      <DanmakuButton onClick={e => { e.stopPropagation(); setDanmakuOpen(true); }} topOffset={captionOffset} />
 
       {/* Bottom navigation — hidden when panel open */}
       {!danmakuOpen && <BottomNav />}
@@ -1126,10 +1192,11 @@ export default function TikTokHome({ className, videoSrc, username, description,
       <AnimatePresence>
         {danmakuOpen && (
           <DanmakuPanel
-            onClose={() => setDanmakuOpen(false)}
             onSend={handleSend}
             danmakuOn={danmakuOn}
             onToggleDanmaku={() => setDanmakuOn(v => !v)}
+            text={panelText}
+            onTextChange={setPanelText}
           />
         )}
       </AnimatePresence>
