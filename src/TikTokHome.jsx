@@ -1054,7 +1054,7 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
 }
 
 // --- Main Page Component ---
-export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts }) {
+export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover' }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
@@ -1149,7 +1149,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
       <video
         ref={videoRef}
         className="absolute pointer-events-none"
-        style={{ top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        style={videoFit === 'contain-top' ? { top: '50%', left: 0, width: '100%', height: 'auto', transform: 'translateY(calc(-50% - 32px))', display: 'block' } : { top: 0, left: 0, width: '100%', height: '100%', objectFit: videoFit, display: 'block' }}
         src={videoSrc || bgVideo}
         autoPlay
         loop

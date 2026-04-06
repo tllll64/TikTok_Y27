@@ -147,6 +147,7 @@ export default function App() {
               captionOffset={demo.captionOffset ?? 0}
               presetDanmakus={demo.danmakus ?? []}
               bgTexts={demo.bgTexts}
+              videoFit={demo.videoFit ?? 'cover'}
             />
           )
           : (

@@ -110,8 +110,9 @@ const DEMOS = [
     video: 'usecase3.mov',
     avatar: 'usecase3.jpg',
     username: '@橘一橙 NiceFriend',
-    description: '如何安稳度过二十几岁焦虑的“Odyssey时期”？很长的talking环节',
-    captionOffset: 24,
+    description: '如何安稳度过二十几岁焦虑的”Odyssey时期”？很长的talking环节',
+    captionOffset: 0,
+    videoFit: 'contain-top',
     danmakus: [
       { text: '毕业找工作中', row: 0 },
       { text: '28岁三年没工作了', row: 0 },
