@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import TikTokHome from './TikTokHome';
 import phoneBezel from './assets/figma/phone-bezel.png';
+import usecase1 from './assets/figma/usecase1.mov';
 
 const SLIDES = [
   { id: 0, label: '弹幕优化展示' },
@@ -9,10 +10,14 @@ const SLIDES = [
   { id: 3, label: '页面 4' },
   { id: 4, label: '页面 5' },
   { id: 5, label: '页面 6' },
-  { id: 6, label: '页面 7' },
+  { id: 6, label: '页面 7 · 用例 Demo' },
   { id: 7, label: '页面 8' },
   { id: 8, label: '页面 9' },
   { id: 9, label: '页面 10' },
+  { id: 10, label: '页面 11' },
+  { id: 11, label: '页面 12' },
+  { id: 12, label: '页面 13' },
+  { id: 13, label: '页面 14' },
 ];
 
 // Scale bezel so its screen cutout (402×874 in original 450×920) matches content (390×844) exactly.
@@ -67,53 +72,91 @@ function SlideNav({ current, onSelect }) {
   const [hovered, setHovered] = useState(null);
 
   return (
-    <div style={{
-      position: 'fixed',
-      right: 32,
-      top: '50%',
-      transform: 'translateY(-50%)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: 14,
-      zIndex: 200,
-    }}>
-      {SLIDES.map((slide) => {
+    <div
+      style={{
+        position: 'fixed',
+        right: 32,
+        top: '50%',
+        transform: 'translateY(-50%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 14,
+        zIndex: 200,
+      }}
+      onMouseLeave={() => setHovered(null)}
+    >
+      {SLIDES.map((slide, index) => {
         const isActive = current === slide.id;
         const isHovered = hovered === slide.id;
+
+        // Calculate distance from the hovered item
+        let distance = 0;
+        if (hovered !== null) {
+          const hoveredIndex = SLIDES.findIndex(s => s.id === hovered);
+          distance = Math.abs(index - hoveredIndex);
+        }
+
+        // Determine size based on state and distance
+        let size = 8; // default size
+        if (isActive) {
+          size = 10;
+        }
+        
+        if (hovered !== null) {
+          if (isHovered) {
+            size = 14; // Hovered item gets largest
+          } else if (distance === 1) {
+            size = 6;  // Adjacent items get smaller
+          } else if (distance === 2) {
+            size = 4;  // Next adjacent get even smaller
+          } else {
+            size = 4;  // Rest are small
+          }
+        }
+
         return (
           <div
             key={slide.id}
-            style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
+            style={{ 
+              position: 'relative', 
+              display: 'flex', 
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 20, // Fixed width container to keep alignment stable
+              height: 20,
+            }}
             onMouseEnter={() => setHovered(slide.id)}
-            onMouseLeave={() => setHovered(null)}
           >
             {/* Tooltip */}
             {isHovered && (
               <div style={{
                 position: 'absolute',
-                right: 20,
+                right: 28, // Pushed out a bit more because dot is larger
                 whiteSpace: 'nowrap',
-                background: 'rgba(0,0,0,0.75)',
+                background: 'rgba(0,0,0,0.85)',
                 color: '#fff',
-                fontSize: 12,
+                fontSize: 14, // Larger font for tooltip
                 fontFamily: '"PingFang SC", sans-serif',
-                fontWeight: 500,
-                padding: '5px 10px',
-                borderRadius: 6,
+                fontWeight: 600,
+                padding: '8px 14px', // Larger padding
+                borderRadius: 8,
                 pointerEvents: 'none',
                 backdropFilter: 'blur(4px)',
+                transform: 'scale(1.1)', // Scale up effect
+                transformOrigin: 'right center',
+                transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)', // Bouncy transition
               }}>
                 {slide.label}
                 <span style={{
                   position: 'absolute',
-                  right: -5,
+                  right: -6,
                   top: '50%',
                   transform: 'translateY(-50%)',
                   width: 0, height: 0,
-                  borderTop: '5px solid transparent',
-                  borderBottom: '5px solid transparent',
-                  borderLeft: '5px solid rgba(0,0,0,0.75)',
+                  borderTop: '6px solid transparent',
+                  borderBottom: '6px solid transparent',
+                  borderLeft: '6px solid rgba(0,0,0,0.85)',
                 }} />
               </div>
             )}
@@ -121,17 +164,17 @@ function SlideNav({ current, onSelect }) {
             <div
               onClick={() => onSelect(slide.id)}
               style={{
-                width: isActive ? 10 : 8,
-                height: isActive ? 10 : 8,
+                width: size,
+                height: size,
                 borderRadius: '50%',
                 background: isActive
                   ? '#fff'
                   : isHovered
-                    ? 'rgba(255,255,255,0.8)'
-                    : 'rgba(255,255,255,0.35)',
+                    ? '#fff'
+                    : 'rgba(255,255,255,0.4)',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: isActive ? '0 0 0 2px rgba(255,255,255,0.3)' : 'none',
+                transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                boxShadow: isActive && !isHovered ? '0 0 0 2px rgba(255,255,255,0.3)' : 'none',
               }}
             />
           </div>
@@ -155,6 +198,8 @@ export default function App() {
       <PhoneFrame>
         {current === 0
           ? <TikTokHome />
+          : current === 6
+          ? <TikTokHome videoSrc={usecase1} />
           : (
             <div style={{
               width: 390, height: 844,

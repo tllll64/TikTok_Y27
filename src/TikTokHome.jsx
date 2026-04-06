@@ -696,13 +696,32 @@ const BG_TEXTS = [
   ['辅助黄刀兰陵王极其残忍', '兰陵王辅助很强的', '这波操作666', '太强了吧，求带'],
 ];
 const ROW_TOPS = [110, 135, 160];
-const ITEM_DURATION = 8;  // 每条弹幕滚动秒数
+const ITEM_DURATION = 10.67;  // 每条弹幕滚动秒数 (原8s × 1/0.75)
 const FIRE_INTERVAL = 3;  // 每行每隔几秒发射下一条
 
 // 弹幕点击后的弹出菜单
+const HEART_PATH = "M11.9949 21.5575C12.3018 21.5575 12.7621 21.312 13.1714 21.0358C18.5115 17.5575 22 13.4348 22 9.28133C22 5.53708 19.4015 3 16.2506 3C14.4229 3 13.0558 3.93892 12.1823 5.34696C12.0981 5.48267 11.8935 5.48167 11.8103 5.34534C10.952 3.9382 9.57636 3 7.74936 3C4.59847 3 2 5.53708 2 9.28133C2 13.4348 5.48849 17.5575 10.8286 21.0358C11.2379 21.312 11.688 21.5575 11.9949 21.5575Z";
 const LikeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M11.9949 21.5575C12.3018 21.5575 12.7621 21.312 13.1714 21.0358C18.5115 17.5575 22 13.4348 22 9.28133C22 5.53708 19.4015 3 16.2506 3C14.4229 3 13.0558 3.93892 12.1823 5.34696C12.0981 5.48267 11.8935 5.48167 11.8103 5.34534C10.952 3.9382 9.57636 3 7.74936 3C4.59847 3 2 5.53708 2 9.28133C2 13.4348 5.48849 17.5575 10.8286 21.0358C11.2379 21.312 11.688 21.5575 11.9949 21.5575Z" fill="white"/>
+    <path d={HEART_PATH} fill="white"/>
+  </svg>
+);
+const LikeIconRed = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d={HEART_PATH} fill="#FE2C55"/>
+  </svg>
+);
+
+// 弹幕点赞爱心 — 20×20px, #FE2C55 fill, semi-transparent black stroke (Figma node 141-18154)
+const DanmakuHeartIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+    <path
+      d="M11.9949 21.5575C12.3018 21.5575 12.7621 21.312 13.1714 21.0358C18.5115 17.5575 22 13.4348 22 9.28133C22 5.53708 19.4015 3 16.2506 3C14.4229 3 13.0558 3.93892 12.1823 5.34696C12.0981 5.48267 11.8935 5.48167 11.8103 5.34534C10.952 3.9382 9.57636 3 7.74936 3C4.59847 3 2 5.53708 2 9.28133C2 13.4348 5.48849 17.5575 10.8286 21.0358C11.2379 21.312 11.688 21.5575 11.9949 21.5575Z"
+      fill="#FE2C55"
+      stroke="rgba(0,0,0,0.75)"
+      strokeWidth="0.5"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 const DislikeIcon = () => (
@@ -730,7 +749,7 @@ const POPOVER_MENU_ITEMS = [
   { Icon: ReplyIcon, label: '回复' },
 ];
 
-function DanmakuPopover({ left, top, arrowLeft }) {
+function DanmakuPopover({ left, top, arrowLeft, onLike, currentLikeCount, baseCount }) {
   return (
     <div
       style={{
@@ -753,20 +772,28 @@ function DanmakuPopover({ left, top, arrowLeft }) {
         padding: '0 6px', boxSizing: 'border-box', overflow: 'hidden',
         boxShadow: '0px 8px 40px 0px rgba(0,0,0,0.15)',
       }}>
-        {POPOVER_MENU_ITEMS.map(({ Icon, label }) => (
-          <div key={label} style={{
-            width: 52, height: 70,
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            gap: 4, padding: '12px 6px', boxSizing: 'border-box', cursor: 'pointer',
-          }}>
-            <Icon />
-            <span style={{
-              color: '#FFF',
-              fontFamily: '"PingFang SC", sans-serif',
-              fontSize: 13, fontWeight: 500, lineHeight: 'normal', whiteSpace: 'nowrap',
-            }}>{label}</span>
-          </div>
-        ))}
+        {POPOVER_MENU_ITEMS.map(({ Icon, label }) => {
+          const isLikeBtn = label === '喜欢';
+          const liked = isLikeBtn && currentLikeCount > baseCount;
+          return (
+            <div key={label}
+              onClick={isLikeBtn ? onLike : undefined}
+              style={{
+                width: 52, height: 70,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                gap: 4, padding: '12px 6px', boxSizing: 'border-box', cursor: 'pointer',
+              }}>
+              {isLikeBtn && liked ? <LikeIconRed /> : <Icon />}
+              <span style={{
+                color: isLikeBtn && liked ? '#FE2C55' : '#FFF',
+                fontFamily: '"PingFang SC", sans-serif',
+                fontSize: 13, fontWeight: 500, lineHeight: 'normal', whiteSpace: 'nowrap',
+              }}>
+                {isLikeBtn ? currentLikeCount : label}
+              </span>
+            </div>
+          );
+        })}
         {/* ··· vertical dots — no label, 36px wide */}
         <div style={{
           width: 36, height: 70,
@@ -784,8 +811,9 @@ function DanmakuPopover({ left, top, arrowLeft }) {
   );
 }
 
-// 单条弹幕
-function DanmakuItem({ text, isUser, myKey, activeKey, onItemClick, onEnd }) {
+// 单条弹幕 — likeCount is 1 when liked, 0 when not
+function DanmakuItem({ text, isUser, myKey, activeKey, likeCount, baseCount, onItemClick, onEnd }) {
+  const isLiked = likeCount > 0;
   const isActive = activeKey === myKey;
   const dimmed = !!activeKey && !isActive;
   return (
@@ -826,21 +854,29 @@ function DanmakuItem({ text, isUser, myKey, activeKey, onItemClick, onEnd }) {
       onAnimationEnd={onEnd}
     >
       {text}
+      {isLiked && (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, marginLeft: 6 }}>
+          <DanmakuHeartIcon />
+        </span>
+      )}
     </span>
   );
 }
 
 // 单行弹幕轨道
-function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick }) {
+function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister }) {
   const [active, setActive] = useState([]);
   const bgIndex = useRef(0);
   // 待发射的用户弹幕队列
   const userQueue = useRef([]);
+  // 已入队的用户弹幕 ID 集合（防止重复入队）
+  const enqueuedIds = useRef(new Set());
 
   // 新用户弹幕加入队列
   useEffect(() => {
     pendingUser.forEach(d => {
-      if (!userQueue.current.find(q => q.id === d.id)) {
+      if (!enqueuedIds.current.has(d.id)) {
+        enqueuedIds.current.add(d.id);
         userQueue.current.push(d);
       }
     });
@@ -850,14 +886,16 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
   useEffect(() => {
     function fire() {
       let entry;
+      const baseCount = Math.floor(Math.random() * 81) + 20; // 20–100
       if (userQueue.current.length > 0) {
         const u = userQueue.current.shift();
-        entry = { key: `u-${u.id}`, text: u.text, isUser: true, origId: u.id };
+        entry = { key: `u-${u.id}`, text: u.text, isUser: true, origId: u.id, baseCount };
       } else {
         const txt = BG_TEXTS[rowIndex][bgIndex.current % BG_TEXTS[rowIndex].length];
         bgIndex.current++;
-        entry = { key: `bg-${rowIndex}-${Date.now()}`, text: txt, isUser: false };
+        entry = { key: `bg-${rowIndex}-${Date.now()}`, text: txt, isUser: false, baseCount };
       }
+      onRegister?.(entry.key, baseCount);
       setActive(prev => [...prev, entry]);
     }
 
@@ -885,6 +923,8 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
           text={item.text}
           isUser={item.isUser}
           activeKey={activeKey}
+          likeCount={likeMap?.[item.key] ? 1 : 0}
+          baseCount={item.baseCount}
           onItemClick={(e, key) => onItemClick(e, key, rowIndex)}
           onEnd={() => remove(item.key, item.origId)}
         />
@@ -894,7 +934,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 }
 
 // Danmaku overlay — 3 独立行轨道，统一调度背景 + 用户弹幕
-function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick }) {
+function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister }) {
   return (
     <>
       <style>{`
@@ -916,6 +956,8 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick })
             onUserEnd={onRemove}
             activeKey={activeKey}
             onItemClick={onItemClick}
+            likeMap={likeMap}
+            onRegister={onRegister}
           />
         ))}
       </div>
@@ -924,19 +966,21 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick })
 }
 
 // --- Main Page Component ---
-export default function TikTokHome({ className }) {
+export default function TikTokHome({ className, videoSrc }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
   const [userDanmakus, setUserDanmakus] = useState([]);
   const [danmakuPopup, setDanmakuPopup] = useState(null); // { key, left, top, arrowLeft }
+  const [danmakuLikes, setDanmakuLikes] = useState({});  // { [key]: count }
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const popupTimerRef = useRef(null);
+  const itemBaseCountRef = useRef({}); // { [key]: baseCount } registered when each item fires
 
   function handleSend(text) {
     if (!text.trim()) return;
-    const id = Date.now();
+    const id = crypto.randomUUID();
     const row = Math.floor(Math.random() * 3); // random row 0-2
     setUserDanmakus(prev => [...prev, { id, text, row }]);
     setDanmakuOpen(false);
@@ -944,6 +988,13 @@ export default function TikTokHome({ className }) {
 
   function removeDanmaku(id) {
     setUserDanmakus(prev => prev.filter(d => d.id !== id));
+  }
+
+  function handleLike() {
+    if (!danmakuPopup) return;
+    const key = danmakuPopup.key;
+    setDanmakuLikes(prev => ({ ...prev, [key]: !prev[key] })); // toggle boolean
+    dismissPopup();
   }
 
   function dismissPopup() {
@@ -966,7 +1017,8 @@ export default function TikTokHome({ className }) {
     popupLeft = Math.max(8, Math.min(390 - 256 - 8, popupLeft));
     const arrowLeft = Math.max(8, Math.min(256 - 28, itemCenterX - popupLeft - 10));
     const popupTop = ROW_TOPS[rowIndex] + 25 + 4;
-    setDanmakuPopup({ key, left: popupLeft, top: popupTop, arrowLeft });
+    const baseCount = itemBaseCountRef.current[key] || (Math.floor(Math.random() * 81) + 20);
+    setDanmakuPopup({ key, left: popupLeft, top: popupTop, arrowLeft, baseCount });
     scheduleAutoDismiss();
   }
 
@@ -983,7 +1035,7 @@ export default function TikTokHome({ className }) {
         ref={videoRef}
         className="absolute pointer-events-none"
         style={{ top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-        src={bgVideo}
+        src={videoSrc || bgVideo}
         autoPlay
         loop
         muted={muted}
@@ -1036,6 +1088,8 @@ export default function TikTokHome({ className }) {
           onRemove={removeDanmaku}
           activeKey={danmakuPopup?.key}
           onItemClick={handleDanmakuClick}
+          likeMap={danmakuLikes}
+          onRegister={(key, bc) => { itemBaseCountRef.current[key] = bc; }}
         />
       )}
 
@@ -1045,6 +1099,9 @@ export default function TikTokHome({ className }) {
           left={danmakuPopup.left}
           top={danmakuPopup.top}
           arrowLeft={danmakuPopup.arrowLeft}
+          onLike={handleLike}
+          baseCount={danmakuPopup.baseCount || 20}
+          currentLikeCount={(danmakuPopup.baseCount || 20) + (danmakuLikes[danmakuPopup.key] ? 1 : 0)}
         />
       )}
 
