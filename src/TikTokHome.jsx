@@ -894,7 +894,7 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
 }
 
 // 单行弹幕轨道
-function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts, plusOneSent }) {
+function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts, plusOneSent, plusOneTextSet }) {
   const [active, setActive] = useState([]);
   const bgIndex = useRef(0);
   const userQueue = useRef([]);
@@ -946,12 +946,12 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
     const baseCount = Math.floor(Math.random() * 81) + 20;
     if (userQueue.current.length > 0) {
       const u = userQueue.current.shift();
-      entry = { key: `u-${u.id}`, text: u.text, isUser: !u.isPreset, origId: u.id, baseCount, isPlusOne: u.isPlusOne ?? false };
+      entry = { key: `u-${u.id}`, text: u.text, isUser: !u.isPreset, origId: u.id, baseCount, isPlusOne: u.isPlusOne ?? false, featured: u.featured ?? false, replies: u.replies ?? 0 };
     } else {
       const pool = bgTexts ?? BG_TEXTS[rowIndex];
       const txt = pool[bgIndex.current % pool.length];
       bgIndex.current++;
-      entry = { key: `bg-${rowIndex}-${Date.now()}`, text: txt, isUser: false, baseCount };
+      entry = { key: `bg-${rowIndex}-${Date.now()}`, text: txt, isUser: false, baseCount, isPlusOne: plusOneTextSet?.has(txt) ?? false };
     }
     onRegister?.(entry.key, baseCount);
     lastFiredKeyRef.current = entry.key;
@@ -1001,11 +1001,11 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
           myKey={item.key}
           text={item.text}
           isUser={item.isUser}
+          isPlusOne={item.isPlusOne}
+          hasSentPlusOne={plusOneSent?.has(item.key)}
           activeKey={activeKey}
           likeCount={likeMap?.[item.key] ? 1 : 0}
           baseCount={item.baseCount}
-          isPlusOne={item.isPlusOne}
-          hasSentPlusOne={plusOneSent?.has(item.key)}
           onItemClick={(e, key, text, ip) => onItemClick(e, key, rowIndex, text, ip)}
           onEnd={() => remove(item.key, item.origId)}
           onMeasure={w => handleMeasure(item.key, w)}
@@ -1018,7 +1018,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 // Danmaku overlay — 3 独立行轨道，统一调度背景 + 用户弹幕
 // panelOpen=true 时将容器切换为 pointer-events:auto 并 stopPropagation，
 // 防止弹幕区域内的空白点击冒泡到主容器导致面板意外关闭。
-function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent }) {
+function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet }) {
   return (
     <>
       <style>{`
@@ -1046,6 +1046,7 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
             onRegister={onRegister}
             bgTexts={bgTexts?.[ri]}
             plusOneSent={plusOneSent}
+            plusOneTextSet={plusOneTextSet}
           />
         ))}
       </div>
@@ -1054,17 +1055,17 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
 }
 
 // --- Main Page Component ---
-export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover' }) {
+export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', plusOneTextSet }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
   const [userDanmakus, setUserDanmakus] = useState(
-    presetDanmakus.map(d => ({ id: crypto.randomUUID(), text: d.text, row: d.row ?? 0, isPreset: true, isPlusOne: d.plusOne ?? false, delay: d.delay ?? 0 }))
+    presetDanmakus.map(d => ({ id: crypto.randomUUID(), text: d.text, row: d.row ?? 0, isPreset: true, isPlusOne: d.plusOne ?? false, delay: d.delay ?? 0, featured: d.featured ?? false, replies: d.replies ?? 0 }))
   );
+  const [plusOneSent, setPlusOneSent] = useState(new Set());
   const [danmakuPopup, setDanmakuPopup] = useState(null); // { key, left, top, arrowLeft, text }
   const [panelText, setPanelText] = useState('');         // controlled text for the input panel
   const [danmakuLikes, setDanmakuLikes] = useState({});  // { [key]: count }
-  const [plusOneSent, setPlusOneSent] = useState(new Set());
   const [showSentToast, setShowSentToast] = useState(false);
 
   const videoRef = useRef(null);
@@ -1208,6 +1209,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
           bgTexts={bgTexts}
           panelOpen={danmakuOpen}
           plusOneSent={plusOneSent}
+          plusOneTextSet={plusOneTextSet}
         />
       )}
 

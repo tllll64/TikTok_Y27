@@ -128,7 +128,7 @@ const DEMOS = [
       { text: '大冒险时期', row: 1 },
       { text: '特别痛苦的时期', row: 1 },
       { text: '嘿嘿马里奥', row: 1 },
-      { text: '焦虑源于方向感，焦虑源于自我认同', row: 1 },
+      { text: '焦虑源于方向感，焦虑源于自我认同', row: 1, featured: true, replies: 46 },
       { text: '28岁未成年', row: 1 },
       { text: '10后就不会了', row: 1 },
       { text: '我真的好讨厌这个阶段', row: 1 },

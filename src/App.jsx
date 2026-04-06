@@ -148,6 +148,7 @@ export default function App() {
               presetDanmakus={demo.danmakus ?? []}
               bgTexts={demo.bgTexts}
               videoFit={demo.videoFit ?? 'cover'}
+              plusOneTextSet={new Set((demo.danmakus ?? []).filter(d => d.plusOne).map(d => d.text))}
             />
           )
           : (
