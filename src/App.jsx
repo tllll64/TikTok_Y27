@@ -135,16 +135,18 @@ export default function App() {
     }}>
       <PhoneFrame>
         {current === 0
-          ? <TikTokHome />
+          ? <TikTokHome key="slide-0" />
           : demo
           ? (
             <TikTokHome
+              key={`slide-${current}`}
               videoSrc={asset(demo.video)}
               avatarSrc={asset(demo.avatar)}
               username={demo.username}
               description={demo.description}
               captionOffset={demo.captionOffset ?? 0}
               presetDanmakus={demo.danmakus ?? []}
+              bgTexts={demo.bgTexts}
             />
           )
           : (

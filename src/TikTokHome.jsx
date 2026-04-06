@@ -696,8 +696,8 @@ const BG_TEXTS = [
   ['辅助黄刀兰陵王极其残忍', '兰陵王辅助很强的', '这波操作666', '太强了吧，求带'],
 ];
 const ROW_TOPS = [110, 135, 160];
-const ITEM_DURATION = 10.67;  // 每条弹幕滚动秒数 (原8s × 1/0.75)
-const FIRE_INTERVAL = 3;  // 每行每隔几秒发射下一条
+const ITEM_DURATION = 13.34;  // 每条弹幕滚动秒数（原10.67s × 1/0.8）
+const FIRE_INTERVAL = 2.07;  // 每行每隔几秒发射下一条（~48px间距）
 
 // 弹幕点击后的弹出菜单
 const HEART_PATH = "M11.9949 21.5575C12.3018 21.5575 12.7621 21.312 13.1714 21.0358C18.5115 17.5575 22 13.4348 22 9.28133C22 5.53708 19.4015 3 16.2506 3C14.4229 3 13.0558 3.93892 12.1823 5.34696C12.0981 5.48267 11.8935 5.48167 11.8103 5.34534C10.952 3.9382 9.57636 3 7.74936 3C4.59847 3 2 5.53708 2 9.28133C2 13.4348 5.48849 17.5575 10.8286 21.0358C11.2379 21.312 11.688 21.5575 11.9949 21.5575Z";
@@ -864,7 +864,7 @@ function DanmakuItem({ text, isUser, myKey, activeKey, likeCount, baseCount, onI
 }
 
 // 单行弹幕轨道
-function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister }) {
+function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts }) {
   const [active, setActive] = useState([]);
   const bgIndex = useRef(0);
   // 待发射的用户弹幕队列
@@ -889,9 +889,10 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
       const baseCount = Math.floor(Math.random() * 81) + 20; // 20–100
       if (userQueue.current.length > 0) {
         const u = userQueue.current.shift();
-        entry = { key: `u-${u.id}`, text: u.text, isUser: true, origId: u.id, baseCount };
+        entry = { key: `u-${u.id}`, text: u.text, isUser: !u.isPreset, origId: u.id, baseCount };
       } else {
-        const txt = BG_TEXTS[rowIndex][bgIndex.current % BG_TEXTS[rowIndex].length];
+        const pool = bgTexts ?? BG_TEXTS[rowIndex];
+        const txt = pool[bgIndex.current % pool.length];
         bgIndex.current++;
         entry = { key: `bg-${rowIndex}-${Date.now()}`, text: txt, isUser: false, baseCount };
       }
@@ -934,7 +935,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 }
 
 // Danmaku overlay — 3 独立行轨道，统一调度背景 + 用户弹幕
-function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister }) {
+function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts }) {
   return (
     <>
       <style>{`
@@ -958,6 +959,7 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
             onItemClick={onItemClick}
             likeMap={likeMap}
             onRegister={onRegister}
+            bgTexts={bgTexts?.[ri]}
           />
         ))}
       </div>
@@ -966,12 +968,12 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
 }
 
 // --- Main Page Component ---
-export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [] }) {
+export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
   const [userDanmakus, setUserDanmakus] = useState(
-    presetDanmakus.map(d => ({ id: crypto.randomUUID(), text: d.text, row: d.row ?? 0 }))
+    presetDanmakus.map(d => ({ id: crypto.randomUUID(), text: d.text, row: d.row ?? 0, isPreset: true }))
   );
   const [danmakuPopup, setDanmakuPopup] = useState(null); // { key, left, top, arrowLeft }
   const [danmakuLikes, setDanmakuLikes] = useState({});  // { [key]: count }
@@ -1092,6 +1094,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
           onItemClick={handleDanmakuClick}
           likeMap={danmakuLikes}
           onRegister={(key, bc) => { itemBaseCountRef.current[key] = bc; }}
+          bgTexts={bgTexts}
         />
       )}
 

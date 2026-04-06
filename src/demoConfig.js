@@ -44,6 +44,13 @@ const DEMOS = [
       { text: '男神你随便吧', row: 0 },
       { text: '男神你随便吧', row: 0 },
       { text: '男神你随便吧', row: 0 },
+      { text: '太帅了', row: 0 },
+      { text: '神了吧', row: 0 },
+      { text: '太帅了', row: 0 },
+      { text: '男神你随便吧', row: 1 },
+      { text: '男神你随便吧', row: 1 },
+      { text: '男神你随便吧', row: 1 },
+      { text: '太帅了', row: 1 },
       { text: '神了吧', row: 1 },
       { text: '太帅了', row: 1 },
       { text: '男神你随便吧', row: 1 },
@@ -51,8 +58,16 @@ const DEMOS = [
       { text: '男神你随便吧', row: 1 },
       { text: '老公你随便吧', row: 1 },
       { text: '男神你随便吧', row: 1 },
+      { text: '男神你随便吧', row: 1 },
+      { text: '男神你随便吧', row: 1 },
+      { text: '男神你随便吧', row: 1 },
       { text: '夯爆了', row: 2},
       { text: '男神！', row: 2 },
+      { text: '男神你随便吧', row: 2 },
+      { text: '男神你随便吧', row: 2 },
+      { text: '男神你随便吧', row: 2 },
+      { text: '男神你随便吧', row: 2 },
+      { text: '男神你随便吧', row: 2 },
       { text: '男神你随便吧', row: 2 },
       { text: '老公你随便吧', row: 2 },
       { text: '男神你随便吧', row: 2 },
@@ -73,5 +88,18 @@ const DEMOS = [
   //   ],
   // },
 ];
+
+// 自动从 danmakus 按 row 分组，生成各页背景文案池
+DEMOS.forEach(demo => {
+  if (demo.danmakus && demo.danmakus.length > 0) {
+    const pool = [[], [], []];
+    demo.danmakus.forEach(d => pool[d.row ?? 0].push(d.text));
+    // 去重，空行 fallback 用其他行
+    demo.bgTexts = pool.map((arr, i) => {
+      const unique = [...new Set(arr)];
+      return unique.length > 0 ? unique : [...new Set(pool.flat())];
+    });
+  }
+});
 
 export default DEMOS;
