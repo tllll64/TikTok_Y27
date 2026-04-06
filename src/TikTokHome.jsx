@@ -824,10 +824,11 @@ function DanmakuPopover({ left, top, arrowLeft, onLike, onFollowSend, currentLik
 }
 
 // 单条弹幕 — isPlusOne: 可+1弹幕; hasSentPlusOne: 已点击+1; isFeatured: 精选弹幕样式
-function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey, likeCount, baseCount, isFeatured, replies, onItemClick, onEnd, onMeasure }) {
+function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey, likeCount, baseCount, isFeatured, replies, matchCount = 0, onItemClick, onEnd, onMeasure }) {
   const isLiked = likeCount > 0;
-  const isActive = activeKey === myKey;
-  const dimmed = !!activeKey && !isActive;
+  // 精选弹幕不参与 popup/pause 系统
+  const isActive = !isFeatured && (activeKey === myKey);
+  const dimmed = !isFeatured && (!!activeKey && !isActive);
   const spanRef = useRef(null);
   useEffect(() => {
     if (spanRef.current) onMeasure?.(spanRef.current.offsetWidth);
@@ -876,31 +877,43 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
         animationPlayState: isActive ? 'paused' : 'running',
         opacity: dimmed ? 0.25 : 1,
         transition: 'opacity 0.2s, border-color 0.2s',
-        pointerEvents: 'auto',
-        cursor: 'pointer',
+        pointerEvents: isFeatured ? 'none' : 'auto',
+        cursor: isFeatured ? 'default' : 'pointer',
       }}
-      onClick={e => { e.stopPropagation(); onItemClick(e, myKey, text, isPlusOne); }}
+      onClick={isFeatured ? undefined : (e => { e.stopPropagation(); onItemClick(e, myKey, text, isPlusOne); })}
       onAnimationEnd={onEnd}
     >
       {isFeatured && (
         <span style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          height: 20,
-          padding: '0 4px',
-          borderRadius: 4,
-          overflow: 'hidden',
-          flexShrink: 0,
-          backgroundImage: 'linear-gradient(127deg, rgba(254,44,85,0.4) 12%, rgba(129,17,39,0.4) 100%), linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.06) 100%)',
-          fontFamily: '"PingFang SC", sans-serif',
-          fontWeight: 700,
-          fontSize: 12,
-          color: '#FFF',
-          WebkitTextStrokeWidth: '0',
-          lineHeight: 'normal',
-        }}>精选</span>
+          display: 'inline-flex', alignItems: 'center', flexShrink: 0,
+          height: 20, padding: '0 4px', borderRadius: 4, overflow: 'hidden',
+          backgroundImage: 'linear-gradient(127.148deg, rgba(254,44,85,0.7) 11.878%, rgba(129,17,39,0.7) 100%), linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.06) 100%)',
+        }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="11" viewBox="0 0 24 11" fill="none">
+            <path d="M15.252 2.112L12.648 1.296V0.0239997L15.252 0.84V2.112ZM21.012 5.268V7.176C21.012 7.296 21.06 7.368 21.156 7.392C21.372 7.416 21.58 7.416 21.78 7.392C21.884 7.368 21.936 7.296 21.936 7.176V5.904L23.232 6.072V7.62C23.192 8.212 22.92 8.56 22.416 8.664C21.768 8.768 21.144 8.776 20.544 8.688C19.936 8.568 19.62 8.212 19.596 7.62V5.268H18.66C18.548 6.092 18.276 6.8 17.844 7.392C17.42 7.984 16.788 8.528 15.948 9.024L15.444 7.608C16.484 7 17.088 6.22 17.256 5.268H15.456L15.336 4.092H18.66V2.52H17.232C17.16 2.792 17.044 3.16 16.884 3.624H15.48C15.864 2.616 16.16 1.5 16.368 0.276H17.748C17.684 0.644 17.612 1.008 17.532 1.368H18.66V0H20.076V1.368H22.596V2.52H20.076V4.092H23.016V5.268H21.012ZM14.88 7.284C14.944 8.044 15.196 8.588 15.636 8.916C16.012 9.196 16.556 9.336 17.268 9.336H23.22L22.908 10.596H17.244C15.748 10.596 14.768 10.088 14.304 9.072C14.08 9.696 13.48 10.292 12.504 10.86L12.096 9.648C12.52 9.392 12.86 9.056 13.116 8.64C13.372 8.216 13.504 7.784 13.512 7.344V4.416C13.504 4.288 13.436 4.22 13.308 4.212H12.42L12.3 3.012H13.932C14.564 3.012 14.88 3.324 14.88 3.948V7.284Z" fill="white"/>
+            <path d="M3.264 3.168L3.552 0.84H4.596L4.308 3.168H3.264ZM0.312 0.84H1.38L1.68 3.168H0.612L0.312 0.84ZM9.216 9H6.24V10.824H4.836V6.036C4.836 5.396 5.14 5.076 5.748 5.076H9.708C10.316 5.076 10.62 5.396 10.62 6.036V9.528C10.62 9.904 10.508 10.208 10.284 10.44C10.06 10.664 9.76 10.784 9.384 10.8C8.824 10.816 8.312 10.78 7.848 10.692L7.584 9.54C7.984 9.62 8.38 9.656 8.772 9.648C9.068 9.632 9.216 9.504 9.216 9.264V9ZM9.216 7.992V7.584H6.24V7.992H9.216ZM9.216 6.576V6.336C9.216 6.216 9.16 6.156 9.048 6.156H6.408C6.296 6.156 6.24 6.216 6.24 6.336V6.576H9.216ZM8.436 3.6H11.148V4.68H4.572L4.464 3.6H7.02V3.24H5.088L4.968 2.184H7.02V1.824H4.872L4.74 0.744H7.02V0H8.436V0.744H10.776V1.824H8.436V2.184H10.548V3.24H8.436V3.6ZM3.108 6.624V10.824H1.812V7.32C1.476 8.056 1.04 8.68 0.504 9.192L0 7.908C0.76 7.06 1.272 6.088 1.536 4.992H0.312L0.192 3.792H1.812V0.0119998H3.108V3.792H4.332V4.992H3.108V5.76H3.984L4.668 8.4H3.552L3.108 6.624Z" fill="white"/>
+          </svg>
+        </span>
       )}
       {text}
+      {isUser && matchCount > 1 && (
+        <span style={{ display: 'inline-flex', alignItems: 'center', overflow: 'hidden', height: '1.2em', marginLeft: 2 }}>
+          <span
+            key={matchCount}
+            style={{
+              display: 'block',
+              animation: 'count-roll 0.22s ease-out',
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'rgba(255,255,255,0.95)',
+              lineHeight: 1.2,
+              WebkitTextStrokeWidth: '0',
+            }}
+          >
+            ×{matchCount}
+          </span>
+        </span>
+      )}
       {showPlusOne && <PlusOneIcon />}
       {isFeatured && replies > 0 && (
         <span style={{
@@ -936,7 +949,7 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
 }
 
 // 单行弹幕轨道
-function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts, plusOneSent, plusOneTextSet }) {
+function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts, plusOneSent, plusOneTextSet, onTextAppear, onTextLeave, textCounts }) {
   const [active, setActive] = useState([]);
   const bgIndex = useRef(0);
   const userQueue = useRef([]);
@@ -998,6 +1011,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
     onRegister?.(entry.key, baseCount);
     lastFiredKeyRef.current = entry.key;
     lastFireTimeRef.current = Date.now();
+    onTextAppear?.(entry.text);
     setActive(prev => [...prev, entry]);
     // Schedule next fire using estimated width (will be corrected by onMeasure)
     scheduleNext(estimateWidth(entry.text, entry.isUser));
@@ -1031,7 +1045,11 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
   }, []);
 
   function remove(key, origId) {
-    setActive(prev => prev.filter(i => i.key !== key));
+    setActive(prev => {
+      const item = prev.find(i => i.key === key);
+      if (item) onTextLeave?.(item.text);
+      return prev.filter(i => i.key !== key);
+    });
     if (origId) onUserEnd(origId);
   }
 
@@ -1050,6 +1068,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
           baseCount={item.baseCount}
           isFeatured={item.featured}
           replies={item.replies}
+          matchCount={textCounts?.[item.text] ?? 0}
           onItemClick={(e, key, text, ip) => onItemClick(e, key, rowIndex, text, ip)}
           onEnd={() => remove(item.key, item.origId)}
           onMeasure={w => handleMeasure(item.key, w)}
@@ -1063,12 +1082,30 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 // panelOpen=true 时将容器切换为 pointer-events:auto 并 stopPropagation，
 // 防止弹幕区域内的空白点击冒泡到主容器导致面板意外关闭。
 function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet }) {
+  const [textCounts, setTextCounts] = useState({});
+
+  function onTextAppear(text) {
+    setTextCounts(prev => ({ ...prev, [text]: (prev[text] || 0) + 1 }));
+  }
+
+  function onTextLeave(text) {
+    setTextCounts(prev => {
+      const n = (prev[text] || 0) - 1;
+      if (n <= 0) { const { [text]: _, ...rest } = prev; return rest; }
+      return { ...prev, [text]: n };
+    });
+  }
+
   return (
     <>
       <style>{`
         @keyframes danmaku-item {
           from { transform: translateX(390px); }
           to   { transform: translateX(-500px); }
+        }
+        @keyframes count-roll {
+          from { transform: translateY(-60%); opacity: 0; }
+          to   { transform: translateY(0);    opacity: 1; }
         }
       `}</style>
       <div
@@ -1091,6 +1128,9 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
             bgTexts={bgTexts?.[ri]}
             plusOneSent={plusOneSent}
             plusOneTextSet={plusOneTextSet}
+            onTextAppear={onTextAppear}
+            onTextLeave={onTextLeave}
+            textCounts={textCounts}
           />
         ))}
       </div>
@@ -1099,7 +1139,7 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
 }
 
 // --- Main Page Component ---
-export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', plusOneTextSet }) {
+export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, plusOneTextSet, disclaimerMaskHeight = 0 }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
@@ -1191,16 +1231,23 @@ export default function TikTokHome({ className, videoSrc, username, description,
       }}
     >
       {/* Background video */}
-      <video
-        ref={videoRef}
-        className="absolute pointer-events-none"
-        style={videoFit === 'contain-top' ? { top: '50%', left: 0, width: '100%', height: 'auto', transform: 'translateY(calc(-50% - 32px))', display: 'block' } : { top: 0, left: 0, width: '100%', height: '100%', objectFit: videoFit, display: 'block' }}
-        src={videoSrc || bgVideo}
-        autoPlay
-        loop
-        muted={muted}
-        playsInline
-      />
+      <div style={{
+        position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+        ...(videoScale !== 1 ? { transform: `translateY(52px) scale(${videoScale})`, transformOrigin: 'top center' } : {}),
+      }}>
+        <video
+          ref={videoRef}
+          className="absolute pointer-events-none"
+          style={videoFit === 'contain-top'
+            ? { top: '50%', left: 0, width: '100%', height: 'auto', transform: 'translateY(calc(-50% - 32px))', display: 'block' }
+            : { top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+          src={videoSrc || bgVideo}
+          autoPlay
+          loop
+          muted={muted}
+          playsInline
+        />
+      </div>
 
       {/* Mute toggle button */}
       {!danmakuOpen && <div
@@ -1234,6 +1281,18 @@ export default function TikTokHome({ className, videoSrc, username, description,
 
       {/* Bottom gradient mask */}
       <MaskBottom className="absolute h-[280px] left-0 top-[481px] w-[390px]" />
+
+      {/* 免责声明遮罩 — 覆盖视频内嵌文字，位于 video 层上方、StatusBar/TopNav/弹幕层下方 */}
+      {disclaimerMaskHeight > 0 && (
+        <div style={{
+          position: 'absolute',
+          top: 4,
+          left: 0,
+          width: 390,
+          height: disclaimerMaskHeight,
+          background: '#000',
+        }} />
+      )}
 
       {/* Status bar */}
       <StatusBar className="absolute h-[44px] left-0 top-0 w-[390px]" />

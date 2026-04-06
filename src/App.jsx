@@ -1,12 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import TikTokHome from './TikTokHome';
 import phoneBezel from './assets/figma/phone-bezel.png';
+import slide6TooltipImg from './assets/figma/6d097609b258bdc99e1d20a9c4a1650bd265a6d7.png';
+import slide6LineImg from './assets/figma/9bfd7f9a50fa089902aaea3ceeeb3b2cf615f0ac.svg';
 import DEMOS from './demoConfig';
 
-// Eagerly load all assets in figma/ so we can look them up by filename at runtime
+// Eagerly load all assets across figma/, video/, avatar/
 const FIGMA_ASSETS = import.meta.glob('./assets/figma/*', { eager: true });
-function asset(filename) {
-  const mod = FIGMA_ASSETS[`./assets/figma/${filename}`];
+const VIDEO_ASSETS = import.meta.glob('./assets/video/*', { eager: true });
+const AVATAR_ASSETS = import.meta.glob('./assets/avatar/*', { eager: true });
+
+function videoAsset(filename) {
+  const mod = VIDEO_ASSETS[`./assets/video/${filename}`]
+    ?? FIGMA_ASSETS[`./assets/figma/${filename}`];
+  return mod ? mod.default : null;
+}
+function avatarAsset(filename) {
+  const mod = AVATAR_ASSETS[`./assets/avatar/${filename}`]
+    ?? FIGMA_ASSETS[`./assets/figma/${filename}`];
   return mod ? mod.default : null;
 }
 
@@ -23,6 +34,14 @@ const BEZEL_W = Math.round(450 * 390 / 402);
 const BEZEL_H = Math.round(920 * 844 / 874);
 const CONTENT_X = Math.round(24 * 390 / 402);
 const CONTENT_Y = Math.round(23 * 844 / 874);
+
+// Reference slide canvas: 1920 × 1080
+// Phone in Figma: bezel-top-left at x≈1149, y≈105 (account for -10px bezel bleed)
+const SLIDE_W = 1920;
+const SLIDE_H = 1080;
+// Left edge of the bezel so the 390px screen aligns with Figma's screen area (x=1160)
+const PHONE_LEFT = 1160 - CONTENT_X;    // ≈ 1137
+const PHONE_TOP  = Math.round((SLIDE_H - BEZEL_H) / 2); // vertically centered ≈ 96
 
 function PhoneFrame({ children }) {
   return (
@@ -48,6 +67,148 @@ function PhoneFrame({ children }) {
           pointerEvents: 'none', userSelect: 'none', zIndex: 50,
         }}
       />
+    </div>
+  );
+}
+
+// ── Slide-6 left panel ────────────────────────────────────────────────────────
+// Coordinates are in the 1920×1080 reference space; the parent scales via CSS.
+function Slide6LeftPanel() {
+  return (
+    <>
+      {/* ── Text block: title + description ── */}
+      <div style={{
+        position: 'absolute',
+        left: 231,
+        top: 339,
+        width: 620,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 20,
+      }}>
+        {/* Title */}
+        <div style={{
+          fontFamily: '"PingFang SC", sans-serif',
+          fontWeight: 400,
+          fontSize: 40,
+          color: '#FFFFFF',
+          lineHeight: 1.6,
+          whiteSpace: 'pre-line',
+        }}>
+          {'弹幕跟发，\n基于已有的优质表达快速二创'}
+        </div>
+        {/* Description */}
+        <div style={{
+          fontFamily: '"PingFang SC", sans-serif',
+          fontWeight: 400,
+          fontSize: 20,
+          color: 'rgba(255,255,255,0.7)',
+          lineHeight: 1.6,
+          whiteSpace: 'pre-line',
+        }}>
+          {'点击弹幕，tooltip 中新增 "跟发" 功能，聚合复制粘贴功能。\n点击功能后，弹幕文本被快速复制到弹幕面板输入框中，方便再编辑。'}
+        </div>
+      </div>
+
+      {/* ── Tooltip UI screenshot ── */}
+      <img
+        src={slide6TooltipImg}
+        alt="弹幕跟发 tooltip 示意"
+        draggable={false}
+        style={{
+          position: 'absolute',
+          left: 249,
+          top: 614,
+          width: 484,
+          height: 229.5,
+          objectFit: 'cover',
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      />
+
+      {/* ── Teal gradient accent ── */}
+      <div style={{
+        position: 'absolute',
+        left: 394,
+        top: 773,
+        width: 67.5,
+        height: 40,
+        background: 'linear-gradient(to bottom, rgba(4,95,106,0), rgba(7,186,208,0.5))',
+      }} />
+
+      {/* ── Horizontal line accent ── */}
+      <img
+        src={slide6LineImg}
+        alt=""
+        draggable={false}
+        style={{
+          position: 'absolute',
+          left: 395,
+          top: 813,
+          width: 66,
+          height: 2,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      />
+    </>
+  );
+}
+
+// ── Full-slide wrapper ────────────────────────────────────────────────────────
+// Phone stays at natural size; left panel scales to fit; the pair is centred.
+// LEFT_PANEL_CLIP: clip right edge of panel at this x in reference space.
+// All visible content (title x=231+620=851, image x=249+484=733) fits within 880px.
+const PANEL_PHONE_GAP = 60;
+const LEFT_PANEL_CLIP = 880; // reference px — trims empty space right of content
+
+function FullSlide({ leftPanel, children }) {
+  const [panelScale, setPanelScale] = useState(1);
+
+  useEffect(() => {
+    const update = () => {
+      const margin = 40;
+      const leftWidth = window.innerWidth - margin * 2 - BEZEL_W - PANEL_PHONE_GAP;
+      const s = Math.min(
+        leftWidth / LEFT_PANEL_CLIP,
+        window.innerHeight / SLIDE_H,
+      );
+      setPanelScale(Math.max(0.3, s));
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  const scaledW = Math.round(LEFT_PANEL_CLIP * panelScale);
+  const scaledH = Math.round(SLIDE_H * panelScale);
+
+  return (
+    <div style={{
+      width: '100vw', height: '100vh',
+      background: '#000',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      gap: PANEL_PHONE_GAP,
+      overflow: 'hidden',
+    }}>
+      {/* Left panel — clipped to LEFT_PANEL_CLIP so the pair centres correctly */}
+      <div style={{
+        width: scaledW, height: scaledH,
+        position: 'relative', overflow: 'hidden', flexShrink: 0,
+      }}>
+        <div style={{
+          position: 'absolute', width: PHONE_LEFT, height: SLIDE_H,
+          transform: `scale(${panelScale})`, transformOrigin: 'top left',
+        }}>
+          {leftPanel}
+        </div>
+      </div>
+
+      {/* Phone at natural size */}
+      <div style={{ flexShrink: 0 }}>
+        {children}
+      </div>
     </div>
   );
 }
@@ -124,48 +285,64 @@ function SlideNav({ current, onSelect }) {
   );
 }
 
+function PhoneContent({ current, demo }) {
+  if (current === 0) return <TikTokHome key="slide-0" />;
+  if (demo) {
+    return (
+      <TikTokHome
+        key={`slide-${current}`}
+        videoSrc={videoAsset(demo.video)}
+        avatarSrc={avatarAsset(demo.avatar)}
+        username={demo.username}
+        description={demo.description}
+        captionOffset={demo.captionOffset ?? 0}
+        presetDanmakus={demo.danmakus ?? []}
+        bgTexts={demo.bgTexts}
+        videoFit={demo.videoFit ?? 'cover'}
+        videoScale={demo.videoScale ?? 1}
+        plusOneTextSet={new Set((demo.danmakus ?? []).filter(d => d.plusOne).map(d => d.text))}
+        disclaimerMaskHeight={demo.disclaimerMaskHeight ?? 0}
+      />
+    );
+  }
+  return (
+    <div style={{
+      width: 390, height: 844, background: '#1a1a1a',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexDirection: 'column', gap: 12,
+    }}>
+      <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 48 }}>{current + 1}</div>
+      <div style={{ color: 'rgba(255,255,255,0.15)', fontSize: 14, fontFamily: '"PingFang SC", sans-serif' }}>
+        {SLIDES[current].label}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [current, setCurrent] = useState(0);
   const demo = DEMO_MAP[current];
 
+  // Slides that use the full 1920×1080 layout with a left panel
+  const hasLeftPanel = demo?.leftPanel === true;
+
+  const phoneContent = <PhoneContent current={current} demo={demo} />;
+
   return (
-    <div style={{
-      minHeight: '100vh', background: '#111',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <PhoneFrame>
-        {current === 0
-          ? <TikTokHome key="slide-0" />
-          : demo
-          ? (
-            <TikTokHome
-              key={`slide-${current}`}
-              videoSrc={asset(demo.video)}
-              avatarSrc={asset(demo.avatar)}
-              username={demo.username}
-              description={demo.description}
-              captionOffset={demo.captionOffset ?? 0}
-              presetDanmakus={demo.danmakus ?? []}
-              bgTexts={demo.bgTexts}
-              videoFit={demo.videoFit ?? 'cover'}
-              plusOneTextSet={new Set((demo.danmakus ?? []).filter(d => d.plusOne).map(d => d.text))}
-            />
-          )
-          : (
-            <div style={{
-              width: 390, height: 844, background: '#1a1a1a',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexDirection: 'column', gap: 12,
-            }}>
-              <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 48 }}>{current + 1}</div>
-              <div style={{ color: 'rgba(255,255,255,0.15)', fontSize: 14, fontFamily: '"PingFang SC", sans-serif' }}>
-                {SLIDES[current].label}
-              </div>
-            </div>
-          )
-        }
-      </PhoneFrame>
+    <>
+      {hasLeftPanel ? (
+        <FullSlide leftPanel={<Slide6LeftPanel />}>
+          <PhoneFrame>{phoneContent}</PhoneFrame>
+        </FullSlide>
+      ) : (
+        <div style={{
+          minHeight: '100vh', background: '#111',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <PhoneFrame>{phoneContent}</PhoneFrame>
+        </div>
+      )}
       <SlideNav current={current} onSelect={setCurrent} />
-    </div>
+    </>
   );
 }
