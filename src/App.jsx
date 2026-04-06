@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import TikTokHome from './TikTokHome';
+import phoneBezel from './assets/figma/phone-bezel.png';
 
 const SLIDES = [
   { id: 0, label: '弹幕优化展示' },
@@ -14,6 +15,54 @@ const SLIDES = [
   { id: 9, label: '页面 10' },
 ];
 
+// Scale bezel so its screen cutout (402×874 in original 450×920) matches content (390×844) exactly.
+// sx = 390/402, sy = 844/874
+const BEZEL_W = Math.round(450 * 390 / 402);  // 437
+const BEZEL_H = Math.round(920 * 844 / 874);  // 888
+const CONTENT_X = Math.round(24 * 390 / 402); // 23  (left bezel margin scaled)
+const CONTENT_Y = Math.round(23 * 844 / 874); // 22  (top bezel margin scaled)
+
+function PhoneFrame({ children }) {
+  return (
+    <div style={{
+      position: 'relative',
+      width: BEZEL_W,
+      height: BEZEL_H,
+      flexShrink: 0,
+    }}>
+      {/* Screen content — sits exactly inside the scaled screen cutout */}
+      <div style={{
+        position: 'absolute',
+        left: CONTENT_X,
+        top: CONTENT_Y,
+        width: 390,
+        height: 844,
+        overflow: 'hidden',
+        borderRadius: 44,
+      }}>
+        {children}
+      </div>
+
+      {/* Bezel PNG — scaled to wrap content with zero gap */}
+      <img
+        src={phoneBezel}
+        alt=""
+        draggable={false}
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: BEZEL_W,
+          height: BEZEL_H,
+          pointerEvents: 'none',
+          userSelect: 'none',
+          zIndex: 50,
+        }}
+      />
+    </div>
+  );
+}
+
 function SlideNav({ current, onSelect }) {
   const [hovered, setHovered] = useState(null);
 
@@ -27,7 +76,7 @@ function SlideNav({ current, onSelect }) {
       flexDirection: 'column',
       alignItems: 'center',
       gap: 14,
-      zIndex: 100,
+      zIndex: 200,
     }}>
       {SLIDES.map((slide) => {
         const isActive = current === slide.id;
@@ -56,7 +105,6 @@ function SlideNav({ current, onSelect }) {
                 backdropFilter: 'blur(4px)',
               }}>
                 {slide.label}
-                {/* Arrow pointing right */}
                 <span style={{
                   position: 'absolute',
                   right: -5,
@@ -97,9 +145,14 @@ export default function App() {
   const [current, setCurrent] = useState(0);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {/* Slide content */}
-      <div style={{ width: 390, height: 844, position: 'relative', overflow: 'hidden', borderRadius: 0 }}>
+    <div style={{
+      minHeight: '100vh',
+      background: '#111',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <PhoneFrame>
         {current === 0
           ? <TikTokHome />
           : (
@@ -118,9 +171,8 @@ export default function App() {
             </div>
           )
         }
-      </div>
+      </PhoneFrame>
 
-      {/* Slide navigation dots */}
       <SlideNav current={current} onSelect={setCurrent} />
     </div>
   );
