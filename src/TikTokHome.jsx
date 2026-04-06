@@ -881,7 +881,7 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
         cursor: isFeatured ? 'default' : 'pointer',
       }}
       onClick={isFeatured ? undefined : (e => { e.stopPropagation(); onItemClick(e, myKey, text, isPlusOne); })}
-      onAnimationEnd={onEnd}
+      onAnimationEnd={e => { if (e.animationName === 'danmaku-item') onEnd(); }}
     >
       {isFeatured && (
         <span style={{
@@ -949,7 +949,7 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
 }
 
 // 单行弹幕轨道
-function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts, plusOneSent, plusOneTextSet, onTextAppear, onTextLeave, textCounts }) {
+function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts, plusOneSent, plusOneTextSet, onTextAppear, onTextLeave, textCounts, syncRows }) {
   const [active, setActive] = useState([]);
   const bgIndex = useRef(0);
   const userQueue = useRef([]);
@@ -1037,19 +1037,16 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
   }
 
   useEffect(() => {
-    const init = setTimeout(() => fireRef.current?.(), rowIndex * 1000);
+    const init = setTimeout(() => fireRef.current?.(), syncRows ? 0 : rowIndex * 1000);
     return () => {
       clearTimeout(init);
       clearTimeout(fireTimerRef.current);
     };
   }, []);
 
-  function remove(key, origId) {
-    setActive(prev => {
-      const item = prev.find(i => i.key === key);
-      if (item) onTextLeave?.(item.text);
-      return prev.filter(i => i.key !== key);
-    });
+  function remove(key, origId, text) {
+    setActive(prev => prev.filter(i => i.key !== key));
+    if (text) onTextLeave?.(text);
     if (origId) onUserEnd(origId);
   }
 
@@ -1070,7 +1067,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
           replies={item.replies}
           matchCount={textCounts?.[item.text] ?? 0}
           onItemClick={(e, key, text, ip) => onItemClick(e, key, rowIndex, text, ip)}
-          onEnd={() => remove(item.key, item.origId)}
+          onEnd={() => remove(item.key, item.origId, item.text)}
           onMeasure={w => handleMeasure(item.key, w)}
         />
       ))}
@@ -1081,7 +1078,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 // Danmaku overlay — 3 独立行轨道，统一调度背景 + 用户弹幕
 // panelOpen=true 时将容器切换为 pointer-events:auto 并 stopPropagation，
 // 防止弹幕区域内的空白点击冒泡到主容器导致面板意外关闭。
-function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet }) {
+function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false }) {
   const [textCounts, setTextCounts] = useState({});
 
   function onTextAppear(text) {
@@ -1131,6 +1128,7 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
             onTextAppear={onTextAppear}
             onTextLeave={onTextLeave}
             textCounts={textCounts}
+            syncRows={syncRows}
           />
         ))}
       </div>
@@ -1139,7 +1137,7 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
 }
 
 // --- Main Page Component ---
-export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0 }) {
+export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0, syncRows = false }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
@@ -1316,6 +1314,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
           panelOpen={danmakuOpen}
           plusOneSent={plusOneSent}
           plusOneTextSet={plusOneTextSet}
+          syncRows={syncRows}
         />
       )}
 
