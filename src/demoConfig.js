@@ -69,7 +69,7 @@ const DEMOS = [
     description: '你的男神已上线#刘耀文',
     captionOffset: 24,
     danmakus: [
-      { text: '男神你随便吧', row: 0 },
+      { text: '男神你随便吧', row: 0, plusOne: true, delay: 2000 },
       { text: '老公你随便吧', row: 0 },
       { text: '男神你随便吧', row: 0 },
       { text: '男神你随便吧', row: 0 },

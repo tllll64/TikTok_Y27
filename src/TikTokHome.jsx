@@ -712,6 +712,18 @@ const LikeIconRed = () => (
   </svg>
 );
 
+// +1 发送图标 — Figma node 143-3119
+function PlusOneIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+      <path d="M15.7537 3.70244C15.9845 3.70244 16.1979 3.82584 16.3133 4.02568C16.4287 4.22553 16.4286 4.47131 16.3133 4.67119L13.1356 10.6272C11.4435 10.4925 9.68366 11.2665 8.63165 12.556C8.25915 13.0126 7.9714 13.5383 7.80646 14.1155L7.20392 11.0472C7.12606 10.7994 7.20425 10.5287 7.40216 10.3606L11.2479 7.09892C11.2919 7.06153 11.2971 7.03539 11.2986 7.02372C11.3012 7.00357 11.2964 6.96984 11.2752 6.93388C11.2541 6.89846 11.2276 6.87895 11.2088 6.87138C11.1979 6.86706 11.1721 6.85861 11.118 6.87919L6.43439 8.65947C6.18643 8.75357 5.90596 8.68657 5.72735 8.49052L2.0838 6.21122C1.91183 6.02211 1.86728 5.74876 1.97052 5.51494C2.07392 5.28107 2.30663 5.13026 2.56232 5.13017L15.7537 3.70244Z" fill="white"/>
+      <path d="M10.5838 16.4988L10.8309 15.1129H9.47725L9.70287 13.8451H11.0565L11.2929 12.5129H12.5606L12.3243 13.8451H13.6887L13.4631 15.1129H12.0987L11.8516 16.4988H10.5838Z" fill="white"/>
+      <path d="M16.8182 17.1649H15.5218L16.1306 13.727C16.016 13.9132 15.8059 14.0922 15.5003 14.2641C15.1947 14.436 14.8748 14.522 14.5405 14.522L14.4474 13.3187C14.8963 13.3187 15.3165 13.1826 15.708 12.9105C16.0995 12.6335 16.3407 12.3327 16.4314 12.008H17.7206L16.8182 17.1649Z" fill="white"/>
+      <path d="M18.0181 11.7581L17.9673 12.0511L17.064 17.2083L17.0278 17.4153H15.2231L15.2759 17.1214L15.7573 14.3977C15.7134 14.4252 15.6696 14.4553 15.6226 14.4817C15.2815 14.6736 14.9198 14.7718 14.5405 14.7718H14.3091L14.2915 14.5413L14.1978 13.3382L14.1772 13.0686H14.4478C14.8421 13.0686 15.2127 12.9501 15.5649 12.7054C15.9281 12.4482 16.1211 12.1905 16.1909 11.9407L16.2417 11.7581H18.0181ZM12.8589 12.263L12.8071 12.5569L12.6226 13.595H13.9868L13.9351 13.889L13.7095 15.1565L13.6724 15.3626H12.3081L12.0981 16.5423L12.061 16.7483H10.2856L10.3374 16.4554L10.5317 15.3626H9.1792L9.23096 15.0686L9.45654 13.8011L9.49365 13.595H10.8462L11.0464 12.469L11.0835 12.263H12.8589ZM15.7534 3.45244C16.0737 3.45244 16.3698 3.62366 16.5298 3.90068L16.5825 4.00712C16.6866 4.25948 16.669 4.54724 16.5327 4.78837L16.5337 4.78935L13.356 10.7454L13.2788 10.8899L13.1157 10.8763C11.507 10.7481 9.82672 11.4872 8.82568 12.7142C8.47271 13.1468 8.2012 13.6422 8.04639 14.1839L7.56104 14.1634L6.9585 11.095V11.094C6.86466 10.7581 6.9736 10.3971 7.24072 10.1702L10.5522 7.36064L6.52295 8.89286C6.19367 9.01783 5.82503 8.93647 5.57666 8.69072L1.95166 6.42314L1.92236 6.40458L1.89893 6.37919C1.66064 6.1171 1.59869 5.73863 1.7417 5.41435V5.41337C1.88179 5.09688 2.19221 4.8924 2.53564 4.88212V4.88115L15.7271 3.45341L15.7397 3.45244H15.7534Z" fill="none" stroke="rgba(0,0,0,0.75)" strokeWidth="0.5"/>
+    </svg>
+  );
+}
+
 // 弹幕点赞爱心 — 20×20px, #FE2C55 fill, semi-transparent black stroke (Figma node 141-18154)
 const DanmakuHeartIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
@@ -811,8 +823,8 @@ function DanmakuPopover({ left, top, arrowLeft, onLike, onFollowSend, currentLik
   );
 }
 
-// 单条弹幕 — likeCount is 1 when liked, 0 when not
-function DanmakuItem({ text, isUser, myKey, activeKey, likeCount, baseCount, onItemClick, onEnd, onMeasure }) {
+// 单条弹幕 — isPlusOne: 可+1弹幕; hasSentPlusOne: 已点击+1
+function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey, likeCount, baseCount, onItemClick, onEnd, onMeasure }) {
   const isLiked = likeCount > 0;
   const isActive = activeKey === myKey;
   const dimmed = !!activeKey && !isActive;
@@ -820,6 +832,10 @@ function DanmakuItem({ text, isUser, myKey, activeKey, likeCount, baseCount, onI
   useEffect(() => {
     if (spanRef.current) onMeasure?.(spanRef.current.offsetWidth);
   }, []);
+
+  const showAsUser = isUser || (isPlusOne && hasSentPlusOne);
+  const showPlusOne = isPlusOne && !hasSentPlusOne;
+
   return (
     <span
       ref={spanRef}
@@ -829,18 +845,26 @@ function DanmakuItem({ text, isUser, myKey, activeKey, likeCount, baseCount, onI
         top: 0,
         display: 'inline-flex',
         alignItems: 'center',
-        ...(isUser ? {
+        gap: showPlusOne ? 4 : undefined,
+        ...(showAsUser ? {
           height: 25,
           padding: '0 8px',
           border: '1px solid rgba(255,255,255,0.8)',
           borderRadius: 22,
           background: 'transparent',
           boxSizing: 'border-box',
+        } : showPlusOne ? {
+          height: 25,
+          padding: '2px 10px',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: 23,
+          background: 'rgba(0,0,0,0.1)',
+          boxSizing: 'border-box',
         } : {}),
         color: '#FFF',
-        WebkitTextStrokeWidth: isUser ? '0' : '0.5px',
+        WebkitTextStrokeWidth: (showAsUser || showPlusOne) ? '0' : '0.5px',
         WebkitTextStrokeColor: 'rgba(0,0,0,0.75)',
-        textShadow: isUser ? 'none' : undefined,
+        textShadow: (showAsUser || showPlusOne) ? 'none' : undefined,
         fontFamily: '"PingFang SC", sans-serif',
         fontSize: 15,
         fontWeight: 500,
@@ -851,15 +875,16 @@ function DanmakuItem({ text, isUser, myKey, activeKey, likeCount, baseCount, onI
         animation: `danmaku-item ${ITEM_DURATION}s linear forwards`,
         animationPlayState: isActive ? 'paused' : 'running',
         opacity: dimmed ? 0.25 : 1,
-        transition: 'opacity 0.2s',
+        transition: 'opacity 0.2s, border-color 0.2s',
         pointerEvents: 'auto',
         cursor: 'pointer',
       }}
-      onClick={e => { e.stopPropagation(); onItemClick(e, myKey, text); }}
+      onClick={e => { e.stopPropagation(); onItemClick(e, myKey, text, isPlusOne); }}
       onAnimationEnd={onEnd}
     >
       {text}
-      {isLiked && (
+      {showPlusOne && <PlusOneIcon />}
+      {isLiked && !showPlusOne && (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, marginLeft: 6 }}>
           <DanmakuHeartIcon />
         </span>
@@ -869,7 +894,7 @@ function DanmakuItem({ text, isUser, myKey, activeKey, likeCount, baseCount, onI
 }
 
 // 单行弹幕轨道
-function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts }) {
+function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts, plusOneSent }) {
   const [active, setActive] = useState([]);
   const bgIndex = useRef(0);
   const userQueue = useRef([]);
@@ -887,8 +912,16 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
       if (!enqueuedIds.current.has(d.id)) {
         enqueuedIds.current.add(d.id);
         if (d.isPreset) {
-          // 预设弹幕排到队列末尾，随背景节奏发射
-          userQueue.current.push(d);
+          if (d.delay) {
+            // 到时直接插队并立即发射，不等下一个背景节奏
+            setTimeout(() => {
+              userQueue.current.unshift(d);
+              clearTimeout(fireTimerRef.current);
+              fireTimerRef.current = setTimeout(() => fireRef.current?.(), 0);
+            }, d.delay);
+          } else {
+            userQueue.current.push(d);
+          }
         } else {
           // 用户手动发送：插到队列最前，尽快发射
           userQueue.current.unshift(d);
@@ -913,7 +946,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
     const baseCount = Math.floor(Math.random() * 81) + 20;
     if (userQueue.current.length > 0) {
       const u = userQueue.current.shift();
-      entry = { key: `u-${u.id}`, text: u.text, isUser: !u.isPreset, origId: u.id, baseCount };
+      entry = { key: `u-${u.id}`, text: u.text, isUser: !u.isPreset, origId: u.id, baseCount, isPlusOne: u.isPlusOne ?? false };
     } else {
       const pool = bgTexts ?? BG_TEXTS[rowIndex];
       const txt = pool[bgIndex.current % pool.length];
@@ -971,7 +1004,9 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
           activeKey={activeKey}
           likeCount={likeMap?.[item.key] ? 1 : 0}
           baseCount={item.baseCount}
-          onItemClick={(e, key, text) => onItemClick(e, key, rowIndex, text)}
+          isPlusOne={item.isPlusOne}
+          hasSentPlusOne={plusOneSent?.has(item.key)}
+          onItemClick={(e, key, text, ip) => onItemClick(e, key, rowIndex, text, ip)}
           onEnd={() => remove(item.key, item.origId)}
           onMeasure={w => handleMeasure(item.key, w)}
         />
@@ -983,7 +1018,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 // Danmaku overlay — 3 独立行轨道，统一调度背景 + 用户弹幕
 // panelOpen=true 时将容器切换为 pointer-events:auto 并 stopPropagation，
 // 防止弹幕区域内的空白点击冒泡到主容器导致面板意外关闭。
-function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false }) {
+function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent }) {
   return (
     <>
       <style>{`
@@ -1010,6 +1045,7 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
             likeMap={likeMap}
             onRegister={onRegister}
             bgTexts={bgTexts?.[ri]}
+            plusOneSent={plusOneSent}
           />
         ))}
       </div>
@@ -1023,15 +1059,18 @@ export default function TikTokHome({ className, videoSrc, username, description,
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
   const [userDanmakus, setUserDanmakus] = useState(
-    presetDanmakus.map(d => ({ id: crypto.randomUUID(), text: d.text, row: d.row ?? 0, isPreset: true }))
+    presetDanmakus.map(d => ({ id: crypto.randomUUID(), text: d.text, row: d.row ?? 0, isPreset: true, isPlusOne: d.plusOne ?? false, delay: d.delay ?? 0 }))
   );
   const [danmakuPopup, setDanmakuPopup] = useState(null); // { key, left, top, arrowLeft, text }
   const [panelText, setPanelText] = useState('');         // controlled text for the input panel
   const [danmakuLikes, setDanmakuLikes] = useState({});  // { [key]: count }
+  const [plusOneSent, setPlusOneSent] = useState(new Set());
+  const [showSentToast, setShowSentToast] = useState(false);
 
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const popupTimerRef = useRef(null);
+  const sentToastTimerRef = useRef(null);
   const itemBaseCountRef = useRef({}); // { [key]: baseCount } registered when each item fires
 
   function handleSend(text) {
@@ -1064,8 +1103,16 @@ export default function TikTokHome({ className, videoSrc, username, description,
     popupTimerRef.current = setTimeout(dismissPopup, 6000);
   }
 
-  function handleDanmakuClick(e, key, rowIndex, text) {
+  function handlePlusOne(key) {
+    setPlusOneSent(prev => new Set([...prev, key]));
+    setShowSentToast(true);
+    clearTimeout(sentToastTimerRef.current);
+    sentToastTimerRef.current = setTimeout(() => setShowSentToast(false), 1800);
+  }
+
+  function handleDanmakuClick(e, key, rowIndex, text, isPlusOne) {
     e.stopPropagation();
+    if (isPlusOne) { handlePlusOne(key); return; }
     if (danmakuPopup?.key === key) { dismissPopup(); return; }
     const containerRect = containerRef.current.getBoundingClientRect();
     const itemRect = e.currentTarget.getBoundingClientRect();
@@ -1160,8 +1207,47 @@ export default function TikTokHome({ className, videoSrc, username, description,
           onRegister={(key, bc) => { itemBaseCountRef.current[key] = bc; }}
           bgTexts={bgTexts}
           panelOpen={danmakuOpen}
+          plusOneSent={plusOneSent}
         />
       )}
+
+      {/* +1 已发送 toast — 居中显示，Figma node 143-3278 */}
+      <AnimatePresence>
+        {showSentToast && (
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 100, pointerEvents: 'none',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <motion.div
+              key="sent-toast"
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.85 }}
+              transition={{ duration: 0.18 }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '10px 16px',
+                background: '#393B44',
+                borderRadius: 56,
+                height: 40,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <span style={{
+                fontFamily: '"PingFang SC", sans-serif',
+                fontSize: 14,
+                fontWeight: 400,
+                color: '#FFFFFF',
+                lineHeight: 'normal',
+              }}>
+                弹幕已发送
+              </span>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Danmaku click popover */}
       {danmakuPopup && (
