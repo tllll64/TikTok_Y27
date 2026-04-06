@@ -309,7 +309,7 @@ function TopNav() {
 }
 
 // Right action panel (like, comment, collect, share, music, avatar)
-function ActionPanel() {
+function ActionPanel({ avatarSrc }) {
   return (
     <div className="absolute h-[400px] left-[333px] top-[349px] w-[56px]">
       {/* Avatar */}
@@ -319,7 +319,7 @@ function ActionPanel() {
                style={{ boxShadow: "0px 1px 4px 0px rgba(0,0,0,0.2)" }}>
             <div className="absolute inset-0 pointer-events-none rounded-[22px] overflow-hidden">
               <img alt="" className="absolute max-w-none object-cover rounded-[22px] size-full" src={imgAvatar} />
-              <img alt="" className="absolute max-w-none object-cover rounded-[22px] size-full" src={imgAvatar1} />
+              <img alt="" className="absolute max-w-none object-cover rounded-[22px] size-full" src={avatarSrc || imgAvatar1} />
             </div>
           </div>
         </div>
@@ -396,21 +396,21 @@ function ActionPanel() {
 }
 
 // Caption area (username + description)
-function Caption() {
+function Caption({ username = "@听一", description = "简单可能比复杂更难做到，你必须努力理清思路，从而使其变得简单。", topOffset = 0 }) {
   return (
-    <div className="absolute flex flex-col gap-[6px] items-start justify-center left-[12px] top-[677px] w-[284px]">
+    <div className="absolute flex flex-col gap-[6px] items-start justify-center left-[12px] w-[284px]" style={{ top: 677 + topOffset }}>
       {/* Username */}
       <div className="flex items-center justify-center relative shrink-0">
         <p className="leading-normal not-italic relative shrink-0 text-[17px] text-white whitespace-nowrap"
            style={{ fontFamily: '"PingFang SC", sans-serif', fontWeight: 500 }}>
-          @听一
+          {username}
         </p>
       </div>
       {/* Description */}
       <div className="flex items-start relative shrink-0 w-full">
         <p className="flex-1 leading-normal min-h-px min-w-px not-italic relative text-[15px] text-white"
            style={{ fontFamily: '"PingFang SC", sans-serif', fontWeight: 400 }}>
-          简单可能比复杂更难做到，你必须努力理清思路，从而使其变得简单。
+          {description}
         </p>
       </div>
     </div>
@@ -418,11 +418,11 @@ function Caption() {
 }
 
 // Danmaku input button (bottom left)
-function DanmakuButton({ onClick }) {
+function DanmakuButton({ onClick, topOffset = 0 }) {
   return (
     <div
-      className="absolute flex items-center left-[12px] p-[6px] rounded-[16px] top-[635px] cursor-pointer"
-      style={{ background: "rgba(77,77,77,0.5)" }}
+      className="absolute flex items-center left-[12px] p-[6px] rounded-[16px] cursor-pointer"
+      style={{ top: 635 + topOffset, background: "rgba(77,77,77,0.5)" }}
       onClick={onClick}
     >
       <DanmakuIcon className="relative shrink-0 w-[20px] h-[20px]" />
@@ -966,11 +966,13 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
 }
 
 // --- Main Page Component ---
-export default function TikTokHome({ className, videoSrc }) {
+export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [] }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
-  const [userDanmakus, setUserDanmakus] = useState([]);
+  const [userDanmakus, setUserDanmakus] = useState(
+    presetDanmakus.map(d => ({ id: crypto.randomUUID(), text: d.text, row: d.row ?? 0 }))
+  );
   const [danmakuPopup, setDanmakuPopup] = useState(null); // { key, left, top, arrowLeft }
   const [danmakuLikes, setDanmakuLikes] = useState({});  // { [key]: count }
   const videoRef = useRef(null);
@@ -1106,13 +1108,13 @@ export default function TikTokHome({ className, videoSrc }) {
       )}
 
       {/* Right action panel */}
-      <ActionPanel />
+      <ActionPanel avatarSrc={avatarSrc} />
 
       {/* Caption (username + description) */}
-      <Caption />
+      <Caption username={username} description={description} topOffset={captionOffset} />
 
       {/* Danmaku input button */}
-      <DanmakuButton onClick={() => setDanmakuOpen(true)} />
+      <DanmakuButton onClick={() => setDanmakuOpen(true)} topOffset={captionOffset} />
 
       {/* Bottom navigation — hidden when panel open */}
       {!danmakuOpen && <BottomNav />}

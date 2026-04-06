@@ -1,41 +1,32 @@
 import { useState } from 'react';
 import TikTokHome from './TikTokHome';
 import phoneBezel from './assets/figma/phone-bezel.png';
-import usecase1 from './assets/figma/usecase1.mov';
+import DEMOS from './demoConfig';
 
-const SLIDES = [
-  { id: 0, label: '弹幕优化展示' },
-  { id: 1, label: '页面 2' },
-  { id: 2, label: '页面 3' },
-  { id: 3, label: '页面 4' },
-  { id: 4, label: '页面 5' },
-  { id: 5, label: '页面 6' },
-  { id: 6, label: '页面 7 · 用例 Demo' },
-  { id: 7, label: '页面 8' },
-  { id: 8, label: '页面 9' },
-  { id: 9, label: '页面 10' },
-  { id: 10, label: '页面 11' },
-  { id: 11, label: '页面 12' },
-  { id: 12, label: '页面 13' },
-  { id: 13, label: '页面 14' },
-];
+// Eagerly load all assets in figma/ so we can look them up by filename at runtime
+const FIGMA_ASSETS = import.meta.glob('./assets/figma/*', { eager: true });
+function asset(filename) {
+  const mod = FIGMA_ASSETS[`./assets/figma/${filename}`];
+  return mod ? mod.default : null;
+}
+
+// Build SLIDES array — demo pages get their label from demoConfig, others get a default
+const DEMO_MAP = Object.fromEntries(DEMOS.map(d => [d.slide, d]));
+
+const SLIDES = Array.from({ length: 14 }, (_, i) => ({
+  id: i,
+  label: DEMO_MAP[i]?.label ?? (i === 0 ? '弹幕优化展示' : `页面 ${i + 1}`),
+}));
 
 // Scale bezel so its screen cutout (402×874 in original 450×920) matches content (390×844) exactly.
-// sx = 390/402, sy = 844/874
-const BEZEL_W = Math.round(450 * 390 / 402);  // 437
-const BEZEL_H = Math.round(920 * 844 / 874);  // 888
-const CONTENT_X = Math.round(24 * 390 / 402); // 23  (left bezel margin scaled)
-const CONTENT_Y = Math.round(23 * 844 / 874); // 22  (top bezel margin scaled)
+const BEZEL_W = Math.round(450 * 390 / 402);
+const BEZEL_H = Math.round(920 * 844 / 874);
+const CONTENT_X = Math.round(24 * 390 / 402);
+const CONTENT_Y = Math.round(23 * 844 / 874);
 
 function PhoneFrame({ children }) {
   return (
-    <div style={{
-      position: 'relative',
-      width: BEZEL_W,
-      height: BEZEL_H,
-      flexShrink: 0,
-    }}>
-      {/* Screen content — sits exactly inside the scaled screen cutout */}
+    <div style={{ position: 'relative', width: BEZEL_W, height: BEZEL_H, flexShrink: 0 }}>
       <div style={{
         position: 'absolute',
         left: CONTENT_X,
@@ -47,21 +38,14 @@ function PhoneFrame({ children }) {
       }}>
         {children}
       </div>
-
-      {/* Bezel PNG — scaled to wrap content with zero gap */}
       <img
         src={phoneBezel}
         alt=""
         draggable={false}
         style={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          width: BEZEL_W,
-          height: BEZEL_H,
-          pointerEvents: 'none',
-          userSelect: 'none',
-          zIndex: 50,
+          position: 'absolute', left: 0, top: 0,
+          width: BEZEL_W, height: BEZEL_H,
+          pointerEvents: 'none', userSelect: 'none', zIndex: 50,
         }}
       />
     </div>
@@ -74,104 +58,60 @@ function SlideNav({ current, onSelect }) {
   return (
     <div
       style={{
-        position: 'fixed',
-        right: 32,
-        top: '50%',
-        transform: 'translateY(-50%)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 14,
-        zIndex: 200,
+        position: 'fixed', right: 32, top: '50%', transform: 'translateY(-50%)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        gap: 14, zIndex: 200,
       }}
       onMouseLeave={() => setHovered(null)}
     >
       {SLIDES.map((slide, index) => {
         const isActive = current === slide.id;
         const isHovered = hovered === slide.id;
-
-        // Calculate distance from the hovered item
         let distance = 0;
         if (hovered !== null) {
           const hoveredIndex = SLIDES.findIndex(s => s.id === hovered);
           distance = Math.abs(index - hoveredIndex);
         }
-
-        // Determine size based on state and distance
-        let size = 8; // default size
-        if (isActive) {
-          size = 10;
-        }
-        
+        let size = isActive ? 10 : 8;
         if (hovered !== null) {
-          if (isHovered) {
-            size = 14; // Hovered item gets largest
-          } else if (distance === 1) {
-            size = 6;  // Adjacent items get smaller
-          } else if (distance === 2) {
-            size = 4;  // Next adjacent get even smaller
-          } else {
-            size = 4;  // Rest are small
-          }
+          if (isHovered) size = 14;
+          else if (distance <= 2) size = 6 - (distance - 1) * 2;
+          else size = 4;
         }
 
         return (
           <div
             key={slide.id}
-            style={{ 
-              position: 'relative', 
-              display: 'flex', 
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 20, // Fixed width container to keep alignment stable
-              height: 20,
+            style={{
+              position: 'relative', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', width: 20, height: 20,
             }}
             onMouseEnter={() => setHovered(slide.id)}
           >
-            {/* Tooltip */}
             {isHovered && (
               <div style={{
-                position: 'absolute',
-                right: 28, // Pushed out a bit more because dot is larger
-                whiteSpace: 'nowrap',
-                background: 'rgba(0,0,0,0.85)',
-                color: '#fff',
-                fontSize: 14, // Larger font for tooltip
-                fontFamily: '"PingFang SC", sans-serif',
-                fontWeight: 600,
-                padding: '8px 14px', // Larger padding
-                borderRadius: 8,
-                pointerEvents: 'none',
-                backdropFilter: 'blur(4px)',
-                transform: 'scale(1.1)', // Scale up effect
+                position: 'absolute', right: 28, whiteSpace: 'nowrap',
+                background: 'rgba(0,0,0,0.85)', color: '#fff',
+                fontSize: 14, fontFamily: '"PingFang SC", sans-serif', fontWeight: 600,
+                padding: '8px 14px', borderRadius: 8, pointerEvents: 'none',
+                backdropFilter: 'blur(4px)', transform: 'scale(1.1)',
                 transformOrigin: 'right center',
-                transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)', // Bouncy transition
+                transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
               }}>
                 {slide.label}
                 <span style={{
-                  position: 'absolute',
-                  right: -6,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: 0, height: 0,
-                  borderTop: '6px solid transparent',
-                  borderBottom: '6px solid transparent',
+                  position: 'absolute', right: -6, top: '50%',
+                  transform: 'translateY(-50%)', width: 0, height: 0,
+                  borderTop: '6px solid transparent', borderBottom: '6px solid transparent',
                   borderLeft: '6px solid rgba(0,0,0,0.85)',
                 }} />
               </div>
             )}
-            {/* Dot */}
             <div
               onClick={() => onSelect(slide.id)}
               style={{
-                width: size,
-                height: size,
-                borderRadius: '50%',
-                background: isActive
-                  ? '#fff'
-                  : isHovered
-                    ? '#fff'
-                    : 'rgba(255,255,255,0.4)',
+                width: size, height: size, borderRadius: '50%',
+                background: isActive ? '#fff' : isHovered ? '#fff' : 'rgba(255,255,255,0.4)',
                 cursor: 'pointer',
                 transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
                 boxShadow: isActive && !isHovered ? '0 0 0 2px rgba(255,255,255,0.3)' : 'none',
@@ -186,30 +126,34 @@ function SlideNav({ current, onSelect }) {
 
 export default function App() {
   const [current, setCurrent] = useState(0);
+  const demo = DEMO_MAP[current];
 
   return (
     <div style={{
-      minHeight: '100vh',
-      background: '#111',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
+      minHeight: '100vh', background: '#111',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
       <PhoneFrame>
         {current === 0
           ? <TikTokHome />
-          : current === 6
-          ? <TikTokHome videoSrc={usecase1} />
+          : demo
+          ? (
+            <TikTokHome
+              videoSrc={asset(demo.video)}
+              avatarSrc={asset(demo.avatar)}
+              username={demo.username}
+              description={demo.description}
+              captionOffset={demo.captionOffset ?? 0}
+              presetDanmakus={demo.danmakus ?? []}
+            />
+          )
           : (
             <div style={{
-              width: 390, height: 844,
-              background: '#1a1a1a',
+              width: 390, height: 844, background: '#1a1a1a',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexDirection: 'column', gap: 12,
             }}>
-              <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 48 }}>
-                {current + 1}
-              </div>
+              <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 48 }}>{current + 1}</div>
               <div style={{ color: 'rgba(255,255,255,0.15)', fontSize: 14, fontFamily: '"PingFang SC", sans-serif' }}>
                 {SLIDES[current].label}
               </div>
@@ -217,7 +161,6 @@ export default function App() {
           )
         }
       </PhoneFrame>
-
       <SlideNav current={current} onSelect={setCurrent} />
     </div>
   );
