@@ -823,8 +823,8 @@ function DanmakuPopover({ left, top, arrowLeft, onLike, onFollowSend, currentLik
   );
 }
 
-// 单条弹幕 — isPlusOne: 可+1弹幕; hasSentPlusOne: 已点击+1
-function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey, likeCount, baseCount, onItemClick, onEnd, onMeasure }) {
+// 单条弹幕 — isPlusOne: 可+1弹幕; hasSentPlusOne: 已点击+1; isFeatured: 精选弹幕样式
+function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey, likeCount, baseCount, isFeatured, replies, onItemClick, onEnd, onMeasure }) {
   const isLiked = likeCount > 0;
   const isActive = activeKey === myKey;
   const dimmed = !!activeKey && !isActive;
@@ -845,7 +845,7 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
         top: 0,
         display: 'inline-flex',
         alignItems: 'center',
-        gap: showPlusOne ? 4 : undefined,
+        gap: showPlusOne ? 4 : isFeatured ? 8 : undefined,
         ...(showAsUser ? {
           height: 25,
           padding: '0 8px',
@@ -882,9 +882,51 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
       onClick={e => { e.stopPropagation(); onItemClick(e, myKey, text, isPlusOne); }}
       onAnimationEnd={onEnd}
     >
+      {isFeatured && (
+        <span style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          height: 20,
+          padding: '0 4px',
+          borderRadius: 4,
+          overflow: 'hidden',
+          flexShrink: 0,
+          backgroundImage: 'linear-gradient(127deg, rgba(254,44,85,0.4) 12%, rgba(129,17,39,0.4) 100%), linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.06) 100%)',
+          fontFamily: '"PingFang SC", sans-serif',
+          fontWeight: 700,
+          fontSize: 12,
+          color: '#FFF',
+          WebkitTextStrokeWidth: '0',
+          lineHeight: 'normal',
+        }}>精选</span>
+      )}
       {text}
       {showPlusOne && <PlusOneIcon />}
-      {isLiked && !showPlusOne && (
+      {isFeatured && replies > 0 && (
+        <span style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 2,
+          height: 22,
+          padding: '0 7px',
+          borderRadius: 14,
+          border: '0.5px solid rgba(255,255,255,0.15)',
+          background: 'rgba(255,255,255,0.1)',
+          flexShrink: 0,
+          fontFamily: '"PingFang SC", sans-serif',
+          fontWeight: 400,
+          fontSize: 12,
+          color: '#FFF',
+          WebkitTextStrokeWidth: '0',
+          lineHeight: 'normal',
+        }}>
+          {replies}条回复
+          <svg width="4" height="7" viewBox="0 0 4 7" fill="none" style={{ flexShrink: 0 }}>
+            <path d="M1 1L3 3.5L1 6" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </span>
+      )}
+      {isLiked && !showPlusOne && !isFeatured && (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, marginLeft: 6 }}>
           <DanmakuHeartIcon />
         </span>
@@ -1006,6 +1048,8 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
           activeKey={activeKey}
           likeCount={likeMap?.[item.key] ? 1 : 0}
           baseCount={item.baseCount}
+          isFeatured={item.featured}
+          replies={item.replies}
           onItemClick={(e, key, text, ip) => onItemClick(e, key, rowIndex, text, ip)}
           onEnd={() => remove(item.key, item.origId)}
           onMeasure={w => handleMeasure(item.key, w)}
