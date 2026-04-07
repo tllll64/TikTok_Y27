@@ -19,6 +19,7 @@ const DEMOS = [
   {
     slide: 6,
     label: 'O1 | 弹幕跟发',
+    leftPanel: true,
     video: 'usecase1.mov',
     avatar: 'usecase1.jpg',
     username: '@圆滚滚的瑞吉',
@@ -69,7 +70,7 @@ const DEMOS = [
     description: '你的男神已上线#刘耀文',
     captionOffset: 24,
     danmakus: [
-      { text: '男神你随便吧', row: 0 },
+      { text: '男神你随便吧', row: 0, plusOne: true, delay: 2000 },
       { text: '老公你随便吧', row: 0 },
       { text: '男神你随便吧', row: 0 },
       { text: '男神你随便吧', row: 0 },
@@ -110,8 +111,9 @@ const DEMOS = [
     video: 'usecase3.mov',
     avatar: 'usecase3.jpg',
     username: '@橘一橙 NiceFriend',
-    description: '如何安稳度过二十几岁焦虑的“Odyssey时期”？很长的talking环节',
-    captionOffset: 24,
+    description: '如何安稳度过二十几岁焦虑的”Odyssey时期”？很长的talking环节',
+    captionOffset: 0,
+    videoFit: 'contain-top',
     danmakus: [
       { text: '毕业找工作中', row: 0 },
       { text: '28岁三年没工作了', row: 0 },
@@ -124,7 +126,7 @@ const DEMOS = [
       { text: '这样啊', row: 0 },
       { text: '苦难', row: 1 },
       { text: '很痛苦很迷茫', row: 1 },
-      { text: '焦虑源于方向感，焦虑源于自我认同', row: 1 },
+      { text: '焦虑源于方向感，焦虑源于自我认同', row: 1, featured: true, replies: 46 },
       { text: '大冒险时期', row: 1 },
       { text: '特别痛苦的时期', row: 1 },
       { text: '嘿嘿马里奥', row: 1 },
@@ -151,12 +153,15 @@ const DEMOS = [
 
     {
     slide: 9,
-    label: 'O2 | xxx',
+    label: 'O2 | 评论精选弹幕',
     video: 'usecase4.mov',
-    avatar: 'usecase4.jpg',
+    avatar: 'usecase4.png',
     username: '@尖端锐评玩家',
     description: '从夯到拉 锐评一下奶茶店#从夯到拉排名#内容过于真实#夯爆了',
-    captionOffset: 24,
+    captionOffset: 0,
+    videoScale: 0.8,
+    videoOffsetY: -8,
+    disclaimerMaskHeight: 200,
     danmakus: [
       { text: '夯', row: 0 },
       { text: '夯', row: 0 },
@@ -198,11 +203,15 @@ const DEMOS = [
     {
     slide: 10,
     label: 'O2 | xxx',
+    emojiFloat: true,
     video: 'usecase5-1.mov',
     avatar: 'usecase5-1.jpg',
     username: '@小笼包（见过两次版）',
     description: '所有人Lets接接接#演唱会抢票',
-    captionOffset: 0,
+    captionOffset: 24,
+    videoScale: 0.7,
+    videoOffsetY: -12,
+    syncRows: true,
     danmakus: [
       { text: '接接接', row: 0 },
       { text: '接接接', row: 0 },
