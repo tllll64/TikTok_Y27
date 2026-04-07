@@ -37,6 +37,10 @@ import _imgLineV from './assets/figma/c3fe03a98e9323cc849182eb98e2c1b6f4db0af8.s
 import _imgEmojiIcon from './assets/figma/6b56da5448d7da479e8d2fc1f307d911d116a58a.svg';
 import _imgKeyboard from './assets/figma/c32ffaa71da99de73b376ad5eda6a9abafad4160.svg';
 import _imgEmojiFloat from './assets/figma/78f7959e06dfc9c60e05998c7ad557ceb85ebc93.png';
+import _imgKiteBird   from './assets/figma/kite-bird.png';
+import _imgKiteRope   from './assets/figma/kite-rope.png';
+import _imgKitePaperTop    from './assets/figma/kite-paper-top.png';
+import _imgKitePaperBottom from './assets/figma/kite-paper-bottom.png';
 import popoverArrowSvg from './assets/figma/popover-arrow.svg';
 import popoverHeartSvg from './assets/figma/popover-heart.svg';
 import popoverHeartbrokenSvg from './assets/figma/popover-heartbroken.svg';
@@ -1314,8 +1318,152 @@ function EmojiFloatEffect({ triggerKey }) {
   );
 }
 
+// --- Kite Danmaku (特殊弹幕 for slide 11) ---
+// Paper note height = top(64) + middle(dynamic) + bottom(61)
+// Middle grows with text length (vertical Chinese chars ~18px each), capped at 120px.
+const KITE_PAPER_TOP_H    = 64;
+const KITE_PAPER_BOTTOM_H = 61;
+const KITE_PAPER_MID_MIN  = 20;
+const KITE_PAPER_MID_MAX  = 120;
+const KITE_PAPER_W        = 48;  // paper width
+const KITE_ROPE_H         = 74;
+const KITE_BIRD_W         = 124;
+const KITE_BIRD_H         = 94;
+
+function KiteDanmakuItem({ text, onDone }) {
+  const midH = Math.min(KITE_PAPER_MID_MAX, Math.max(KITE_PAPER_MID_MIN, text.length * 18));
+  const paperH = KITE_PAPER_TOP_H + midH + KITE_PAPER_BOTTOM_H;
+  const totalH = KITE_BIRD_H + KITE_ROPE_H + paperH;
+
+  const startY = 844 + 20;
+  const endY   = 160 - totalH;
+
+  return (
+    <motion.div
+      style={{
+        position: 'absolute',
+        left: '50%',
+        top: 0,
+        x: '-50%',
+        pointerEvents: 'none',
+        zIndex: 25,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+      initial={{ y: startY, opacity: 1 }}
+      animate={{ y: endY, opacity: [1, 1, 0] }}
+      transition={{
+        y: { duration: 4.5, ease: 'easeInOut' },
+        opacity: { duration: 4.5, times: [0, 0.75, 1] },
+      }}
+      onAnimationComplete={onDone}
+    >
+      {/* 纸鸢 kite */}
+      <img
+        src={_imgKiteBird}
+        alt=""
+        style={{
+          width: KITE_BIRD_W,
+          height: KITE_BIRD_H,
+          objectFit: 'contain',
+          transform: 'rotate(-4.21deg)',
+          filter: 'drop-shadow(0px 2px 25px rgba(236,255,224,0.60))',
+          flexShrink: 0,
+        }}
+      />
+
+      {/* 绳子 rope — 1px wide, pulled up to overlap into kite body */}
+      <div style={{
+        width: 1,
+        height: KITE_ROPE_H,
+        marginTop: -28,  // reach up past shadow into the kite body
+        flexShrink: 0,
+        background: 'url(' + _imgKiteRope + ') center/cover',
+        backgroundColor: '#7B5B3A',  // fallback rope color
+      }} />
+
+      {/* 纸条 paper note — position:relative so text overlay works */}
+      <div style={{
+        position: 'relative',
+        width: KITE_PAPER_W,
+        marginTop: -2,    // close gap with rope
+        transform: 'rotate(2.55deg)',
+        filter: 'drop-shadow(0px 2px 21px rgba(236,255,224,0.30))',
+        flexShrink: 0,
+      }}>
+        {/* 上部分 top — image + fade-to-cream at bottom */}
+        <div style={{ position: 'relative', width: KITE_PAPER_W, height: KITE_PAPER_TOP_H, overflow: 'hidden' }}>
+          <img src={_imgKitePaperTop} alt=""
+            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: 24,
+            background: 'linear-gradient(to bottom, rgba(254,245,236,0), #FEF5EC)',
+          }} />
+        </div>
+
+        {/* 可拉长 middle — solid cream, same width */}
+        <div style={{ width: KITE_PAPER_W, height: midH, background: '#FEF5EC' }} />
+
+        {/* 下部分 bottom — fade-from-cream at top + image */}
+        <div style={{ position: 'relative', width: KITE_PAPER_W, height: KITE_PAPER_BOTTOM_H, overflow: 'hidden' }}>
+          <img src={_imgKitePaperBottom} alt=""
+            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 24,
+            background: 'linear-gradient(to bottom, #FEF5EC, rgba(254,245,236,0))',
+          }} />
+        </div>
+
+        {/* 文字 vertical text — centered on full paper height */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          writingMode: 'vertical-rl',
+          textOrientation: 'mixed',
+          fontFamily: '"PingFang SC", sans-serif',
+          fontSize: 18,
+          fontWeight: 500,
+          color: '#294034',
+          lineHeight: 1.2,
+          letterSpacing: 7,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          maxHeight: KITE_PAPER_TOP_H + midH + KITE_PAPER_BOTTOM_H - 24,
+        }}>
+          {text}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function KiteDanmakuEffect({ triggerText }) {
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    if (!triggerText) return;
+    const id = Date.now();
+    setItems(prev => [...prev, { id, text: triggerText }]);
+  }, [triggerText]);
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 25 }}>
+      {items.map(item => (
+        <KiteDanmakuItem
+          key={item.id}
+          text={item.text}
+          onDone={() => setItems(prev => prev.filter(i => i.id !== item.id))}
+        />
+      ))}
+    </div>
+  );
+}
+
 // --- Main Page Component ---
-export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0, syncRows = false, emojiFloat = false }) {
+export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0, syncRows = false, emojiFloat = false, kiteDanmaku = false, disableCounter = false }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
@@ -1328,6 +1476,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
   const [danmakuLikes, setDanmakuLikes] = useState({});  // { [key]: count }
   const [showSentToast, setShowSentToast] = useState(false);
   const [emojiFloatTrigger, setEmojiFloatTrigger] = useState(0);
+  const [kiteDanmakuText, setKiteDanmakuText] = useState(null);
 
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -1342,6 +1491,9 @@ export default function TikTokHome({ className, videoSrc, username, description,
     setUserDanmakus(prev => [...prev, { id, text, row }]);
     setPanelText('');
     setDanmakuOpen(false);
+    if (kiteDanmaku) {
+      setKiteDanmakuText({ text: text.trim(), id: Date.now() });
+    }
   }
 
   function removeDanmaku(id) {
@@ -1551,6 +1703,11 @@ export default function TikTokHome({ className, videoSrc, username, description,
 
       {/* Emoji float effect — triggered when user sends "接接接" */}
       {emojiFloat && <EmojiFloatEffect triggerKey={emojiFloatTrigger} />}
+
+      {/* Kite danmaku — special style for slide 11, triggered on any user send */}
+      {kiteDanmaku && kiteDanmakuText && (
+        <KiteDanmakuEffect key={kiteDanmakuText.id} triggerText={kiteDanmakuText.text} />
+      )}
 
       {/* Right action panel */}
       <ActionPanel avatarSrc={avatarSrc} />

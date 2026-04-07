@@ -252,6 +252,8 @@ const DEMOS = [
     {
     slide: 11,
     label: 'O2 | xxx',
+    kiteDanmaku: true,
+    disableCounter: true,
     video: 'usecase6.mov',
     avatar: 'usecase6.jpg',
     username: '子扬ZYang',

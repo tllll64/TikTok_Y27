@@ -305,6 +305,8 @@ function PhoneContent({ current, demo }) {
         disclaimerMaskHeight={demo.disclaimerMaskHeight ?? 0}
         syncRows={demo.syncRows ?? false}
         emojiFloat={demo.emojiFloat ?? false}
+        kiteDanmaku={demo.kiteDanmaku ?? false}
+        disableCounter={demo.disableCounter ?? false}
       />
     );
   }
