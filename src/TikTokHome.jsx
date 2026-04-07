@@ -1132,7 +1132,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 // Danmaku overlay — 3 独立行轨道，统一调度背景 + 用户弹幕
 // panelOpen=true 时将容器切换为 pointer-events:auto 并 stopPropagation，
 // 防止弹幕区域内的空白点击冒泡到主容器导致面板意外关闭。
-function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false, onUserDanmakuAppear }) {
+function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false, onUserDanmakuAppear, disableCounter = false }) {
   const [textCounts, setTextCounts] = useState({});
   const [magnetedKeys, setMagnetedKeys] = useState(new Set());
   const [ghosts, setGhosts] = useState([]);
@@ -1216,7 +1216,7 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
             plusOneTextSet={plusOneTextSet}
             onTextAppear={onTextAppear}
             onTextLeave={onTextLeave}
-            textCounts={textCounts}
+            textCounts={disableCounter ? undefined : textCounts}
             syncRows={syncRows}
             onItemActive={handleItemActive}
             onItemInactive={handleItemInactive}
@@ -1335,8 +1335,8 @@ function KiteDanmakuItem({ text, onDone }) {
   const paperH = KITE_PAPER_TOP_H + midH + KITE_PAPER_BOTTOM_H;
   const totalH = KITE_BIRD_H + KITE_ROPE_H + paperH;
 
-  const startY = 844 + 20;
-  const endY   = 160 - totalH;
+  const startY = 844 - totalH;  // 底部与屏幕底边对齐，从下方升入
+  const endY   = 170 - totalH;  // 弹幕区域下沿
 
   return (
     <motion.div
@@ -1344,18 +1344,23 @@ function KiteDanmakuItem({ text, onDone }) {
         position: 'absolute',
         left: '50%',
         top: 0,
-        x: '-50%',
+        marginLeft: -(KITE_BIRD_W / 2),
         pointerEvents: 'none',
         zIndex: 25,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
       }}
-      initial={{ y: startY, opacity: 1 }}
-      animate={{ y: endY, opacity: [1, 1, 0] }}
+      initial={{ x: 0, y: startY, opacity: 0 }}
+      animate={{
+        x: [0, 55, -10, -60, 20, 0],
+        y: endY,
+        opacity: [0, 0, 1, 1, 0],
+      }}
       transition={{
-        y: { duration: 4.5, ease: 'easeInOut' },
-        opacity: { duration: 4.5, times: [0, 0.75, 1] },
+        x: { duration: 9, times: [0, 0.2, 0.45, 0.65, 0.85, 1], ease: 'easeInOut' },
+        y: { duration: 9, ease: 'easeInOut' },
+        opacity: { duration: 9, times: [0, 0.11, 0.22, 0.72, 0.83] },
       }}
       onAnimationComplete={onDone}
     >
@@ -1368,7 +1373,7 @@ function KiteDanmakuItem({ text, onDone }) {
           height: KITE_BIRD_H,
           objectFit: 'contain',
           transform: 'rotate(-4.21deg)',
-          filter: 'drop-shadow(0px 2px 25px rgba(236,255,224,0.60))',
+          filter: 'drop-shadow(0px 2px 25px rgba(236,255,224,0.30))',
           flexShrink: 0,
         }}
       />
@@ -1389,7 +1394,7 @@ function KiteDanmakuItem({ text, onDone }) {
         width: KITE_PAPER_W,
         marginTop: -2,    // close gap with rope
         transform: 'rotate(2.55deg)',
-        filter: 'drop-shadow(0px 2px 21px rgba(236,255,224,0.30))',
+        filter: 'drop-shadow(0px 2px 21px rgba(236,255,224,0.15))',
         flexShrink: 0,
       }}>
         {/* 上部分 top — image + fade-to-cream at bottom */}
@@ -1488,11 +1493,16 @@ export default function TikTokHome({ className, videoSrc, username, description,
     if (!text.trim()) return;
     const id = crypto.randomUUID();
     const row = Math.floor(Math.random() * 3); // random row 0-2
-    setUserDanmakus(prev => [...prev, { id, text, row }]);
     setPanelText('');
     setDanmakuOpen(false);
     if (kiteDanmaku) {
+      // 等风筝完全消失后（7.5s）再让普通弹幕飘入
       setKiteDanmakuText({ text: text.trim(), id: Date.now() });
+      setTimeout(() => {
+        setUserDanmakus(prev => [...prev, { id, text, row }]);
+      }, 6500);
+    } else {
+      setUserDanmakus(prev => [...prev, { id, text, row }]);
     }
   }
 
@@ -1647,6 +1657,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
           plusOneTextSet={plusOneTextSet}
           syncRows={syncRows}
           onUserDanmakuAppear={emojiFloat ? (text) => { if (text === '接接接') setEmojiFloatTrigger(v => v + 1); } : undefined}
+          disableCounter={disableCounter}
         />
       )}
 
