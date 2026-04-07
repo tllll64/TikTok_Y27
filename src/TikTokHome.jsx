@@ -36,6 +36,7 @@ import _imgLineH from './assets/figma/c81d257b22d68f2f1b3c1a26e9296f85939030c9.s
 import _imgLineV from './assets/figma/c3fe03a98e9323cc849182eb98e2c1b6f4db0af8.svg';
 import _imgEmojiIcon from './assets/figma/6b56da5448d7da479e8d2fc1f307d911d116a58a.svg';
 import _imgKeyboard from './assets/figma/c32ffaa71da99de73b376ad5eda6a9abafad4160.svg';
+import _imgEmojiFloat from './assets/figma/78f7959e06dfc9c60e05998c7ad557ceb85ebc93.png';
 import popoverArrowSvg from './assets/figma/popover-arrow.svg';
 import popoverHeartSvg from './assets/figma/popover-heart.svg';
 import popoverHeartbrokenSvg from './assets/figma/popover-heartbroken.svg';
@@ -823,6 +824,68 @@ function DanmakuPopover({ left, top, arrowLeft, onLike, onFollowSend, currentLik
   );
 }
 
+// ×N 计数徽章 — 首次挂载从 1 滚到初始 count（1.5s），之后每次增加触发单次滚动
+function CounterBadge({ count }) {
+  const [displayed, setDisplayed] = useState(1);
+  const [animKey, setAnimKey] = useState(0);
+  const timerRef = useRef(null);
+  const initDoneRef = useRef(false);
+  const prevCountRef = useRef(count);
+
+  useEffect(() => {
+    const target = count;
+    if (target <= 1) {
+      setDisplayed(1);
+      setAnimKey(k => k + 1);
+      initDoneRef.current = true;
+      return;
+    }
+    const stepMs = 1500 / target;
+    let cur = 1;
+    const tick = () => {
+      cur++;
+      setDisplayed(cur);
+      setAnimKey(k => k + 1);
+      if (cur < target) {
+        timerRef.current = setTimeout(tick, stepMs);
+      } else {
+        initDoneRef.current = true;
+      }
+    };
+    timerRef.current = setTimeout(tick, stepMs);
+    return () => clearTimeout(timerRef.current);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!initDoneRef.current) return;
+    if (count > prevCountRef.current) {
+      setDisplayed(count);
+      setAnimKey(k => k + 1);
+    }
+    prevCountRef.current = count;
+  }, [count]);
+
+  return (
+    <span style={{ overflow: 'hidden', height: '1.2em', display: 'inline-flex', alignItems: 'center', marginLeft: 2 }}>
+      <span
+        key={animKey}
+        style={{
+          display: 'block',
+          animation: 'count-roll 0.15s ease-out',
+          fontFamily: '"Fugaz One", sans-serif',
+          fontSize: 13,
+          fontWeight: 400,
+          color: '#FE2C55',
+          lineHeight: 1.2,
+          WebkitTextStrokeWidth: '0',
+        }}
+      >
+        ×{displayed}
+      </span>
+    </span>
+  );
+}
+
 // 单条弹幕 — isPlusOne: 可+1弹幕; hasSentPlusOne: 已点击+1; isFeatured: 精选弹幕样式
 function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey, likeCount, baseCount, isFeatured, replies, matchCount = 0, onItemClick, onEnd, onMeasure }) {
   const isLiked = likeCount > 0;
@@ -896,24 +959,7 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
         </span>
       )}
       {text}
-      {isUser && matchCount > 1 && (
-        <span style={{ display: 'inline-flex', alignItems: 'center', overflow: 'hidden', height: '1.2em', marginLeft: 2 }}>
-          <span
-            key={matchCount}
-            style={{
-              display: 'block',
-              animation: 'count-roll 0.22s ease-out',
-              fontSize: 13,
-              fontWeight: 600,
-              color: 'rgba(255,255,255,0.95)',
-              lineHeight: 1.2,
-              WebkitTextStrokeWidth: '0',
-            }}
-          >
-            ×{matchCount}
-          </span>
-        </span>
-      )}
+      {isUser && matchCount > 0 && <CounterBadge count={matchCount} />}
       {showPlusOne && <PlusOneIcon />}
       {isFeatured && replies > 0 && (
         <span style={{
@@ -949,7 +995,7 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
 }
 
 // 单行弹幕轨道
-function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts, plusOneSent, plusOneTextSet, onTextAppear, onTextLeave, textCounts, syncRows }) {
+function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts, plusOneSent, plusOneTextSet, onTextAppear, onTextLeave, textCounts, syncRows, onItemActive, onItemInactive, onUserItemFired, magnetedKeys }) {
   const [active, setActive] = useState([]);
   const bgIndex = useRef(0);
   const userQueue = useRef([]);
@@ -999,19 +1045,22 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
   fireRef.current = () => {
     let entry;
     const baseCount = Math.floor(Math.random() * 81) + 20;
+    const now = Date.now();
     if (userQueue.current.length > 0) {
       const u = userQueue.current.shift();
-      entry = { key: `u-${u.id}`, text: u.text, isUser: !u.isPreset, origId: u.id, baseCount, isPlusOne: u.isPlusOne ?? false, featured: u.featured ?? false, replies: u.replies ?? 0 };
+      entry = { key: `u-${u.id}`, text: u.text, isUser: !u.isPreset, origId: u.id, baseCount, isPlusOne: u.isPlusOne ?? false, featured: u.featured ?? false, replies: u.replies ?? 0, firedAt: now };
     } else {
       const pool = bgTexts ?? BG_TEXTS[rowIndex];
       const txt = pool[bgIndex.current % pool.length];
       bgIndex.current++;
-      entry = { key: `bg-${rowIndex}-${Date.now()}`, text: txt, isUser: false, baseCount, isPlusOne: plusOneTextSet?.has(txt) ?? false };
+      entry = { key: `bg-${rowIndex}-${now}`, text: txt, isUser: false, baseCount, isPlusOne: plusOneTextSet?.has(txt) ?? false, firedAt: now };
     }
     onRegister?.(entry.key, baseCount);
     lastFiredKeyRef.current = entry.key;
-    lastFireTimeRef.current = Date.now();
+    lastFireTimeRef.current = now;
     onTextAppear?.(entry.text);
+    onItemActive?.(entry.key, entry.text, rowIndex, now);
+    if (entry.isUser) onUserItemFired?.(entry.key, entry.text, rowIndex, now);
     setActive(prev => [...prev, entry]);
     // Schedule next fire using estimated width (will be corrected by onMeasure)
     scheduleNext(estimateWidth(entry.text, entry.isUser));
@@ -1047,6 +1096,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
   function remove(key, origId, text) {
     setActive(prev => prev.filter(i => i.key !== key));
     if (text) onTextLeave?.(text);
+    onItemInactive?.(key);
     if (origId) onUserEnd(origId);
   }
 
@@ -1059,7 +1109,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
           text={item.text}
           isUser={item.isUser}
           isPlusOne={item.isPlusOne}
-          hasSentPlusOne={plusOneSent?.has(item.key)}
+          hasSentPlusOne={plusOneSent?.has(item.text)}
           activeKey={activeKey}
           likeCount={likeMap?.[item.key] ? 1 : 0}
           baseCount={item.baseCount}
@@ -1078,19 +1128,54 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 // Danmaku overlay — 3 独立行轨道，统一调度背景 + 用户弹幕
 // panelOpen=true 时将容器切换为 pointer-events:auto 并 stopPropagation，
 // 防止弹幕区域内的空白点击冒泡到主容器导致面板意外关闭。
-function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false }) {
+function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false, onUserDanmakuAppear }) {
   const [textCounts, setTextCounts] = useState({});
+  const [magnetedKeys, setMagnetedKeys] = useState(new Set());
+  const [ghosts, setGhosts] = useState([]);
+  const activeItemsRef = useRef({});      // { [key]: { text, row, firedAt } }
+  const activeUserItemsRef = useRef({}); // { [text]: { key, row, firedAt } }
 
   function onTextAppear(text) {
     setTextCounts(prev => ({ ...prev, [text]: (prev[text] || 0) + 1 }));
   }
+  function onTextLeave(_text) {}
 
-  function onTextLeave(text) {
-    setTextCounts(prev => {
-      const n = (prev[text] || 0) - 1;
-      if (n <= 0) { const { [text]: _, ...rest } = prev; return rest; }
-      return { ...prev, [text]: n };
-    });
+  function handleItemActive(key, text, row, firedAt) {
+    activeItemsRef.current[key] = { text, row, firedAt };
+    const userItem = activeUserItemsRef.current[text];
+    if (userItem && key !== userItem.key) {
+      // 同文本的新弹幕在用户弹幕出现后触发 → 磁吸
+      doMagnetize(key, text, row, userItem);
+    }
+  }
+
+  function handleItemInactive(key) {
+    const item = activeItemsRef.current[key];
+    if (item) {
+      if (activeUserItemsRef.current[item.text]?.key === key) {
+        delete activeUserItemsRef.current[item.text];
+      }
+      delete activeItemsRef.current[key];
+    }
+  }
+
+  function handleUserItemFired(key, text, row, firedAt) {
+    activeUserItemsRef.current[text] = { key, row, firedAt };
+    onUserDanmakuAppear?.(text);
+  }
+
+  function doMagnetize(bgKey, text, bgRow, userItem) {
+    const GHOST_DUR = 0.55; // seconds
+    const userElapsed = Date.now() - userItem.firedAt;
+    const userCurrentX = 390 - (userElapsed / (ITEM_DURATION * 1000)) * 890;
+    // 用户弹幕已滑出左侧屏幕外，暂停磁吸效果
+    if (userCurrentX < 0) return;
+    const fromX = 390;                    // bg 弹幕从右侧入场
+    const fromY = ROW_TOPS[bgRow];
+    const toX = Math.max(-480, 390 - ((userElapsed + GHOST_DUR * 1000) / (ITEM_DURATION * 1000)) * 890);
+    const toY = ROW_TOPS[userItem.row];
+    setMagnetedKeys(prev => new Set([...prev, bgKey]));
+    setGhosts(prev => [...prev, { id: `ghost-${bgKey}`, text, fromX, fromY, toX, toY, dur: GHOST_DUR }]);
   }
 
   return (
@@ -1129,15 +1214,108 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
             onTextLeave={onTextLeave}
             textCounts={textCounts}
             syncRows={syncRows}
+            onItemActive={handleItemActive}
+            onItemInactive={handleItemInactive}
+            onUserItemFired={handleUserItemFired}
+            magnetedKeys={magnetedKeys}
           />
         ))}
       </div>
+
+      {/* 磁吸幽灵层 — 被吸走的弹幕飞向用户弹幕位置后消失 */}
+      <AnimatePresence>
+        {ghosts.map(g => (
+          <motion.span
+            key={g.id}
+            style={{
+              position: 'absolute', left: 0, top: 0,
+              pointerEvents: 'none', zIndex: 11,
+              color: '#FFF',
+              fontFamily: '"PingFang SC", sans-serif',
+              fontSize: 15, fontWeight: 500, whiteSpace: 'nowrap',
+              WebkitTextStrokeWidth: '0.5px',
+              WebkitTextStrokeColor: 'rgba(0,0,0,0.75)',
+            }}
+            initial={{ x: g.fromX, y: g.fromY, scale: 1, opacity: 1 }}
+            animate={{ x: g.toX, y: g.toY, scale: 0, opacity: 0 }}
+            transition={{ duration: g.dur, ease: 'easeIn' }}
+            onAnimationComplete={() => setGhosts(prev => prev.filter(x => x.id !== g.id))}
+          >
+            {g.text}
+          </motion.span>
+        ))}
+      </AnimatePresence>
     </>
   );
 }
 
+// --- Emoji Float Effect ---
+// Sizes follow a bell curve: largest near horizontal center (~162px), smallest at edges.
+// x is calculated so each item's center stays at its intended position.
+const EMOJI_FLOAT_ITEMS = [
+  { x: 19,  size: 44, riseDelay: 0,    targetY: 480, fadeOrder: 2 },  // far left  → small
+  { x: 86,  size: 66, riseDelay: 0.45, targetY: 330, fadeOrder: 0 },  // near center → large
+  { x: 155, size: 73, riseDelay: 0.85, targetY: 530, fadeOrder: 3 },  // near center → large
+  { x: 49,  size: 57, riseDelay: 0.2,  targetY: 400, fadeOrder: 1 },  // left-mid  → medium
+  { x: 229, size: 52, riseDelay: 1.05, targetY: 365, fadeOrder: 4 },  // right-mid → medium
+  { x: 266, size: 43, riseDelay: 0.65, targetY: 575, fadeOrder: 5 },  // far right → small
+  { x: 111, size: 80, riseDelay: 1.25, targetY: 440, fadeOrder: 6 },  // center    → largest
+];
+
+function EmojiFloatItem({ x, size, riseDelay, targetY, fadeOrder, fading }) {
+  return (
+    <motion.img
+      src={_imgEmojiFloat}
+      alt=""
+      style={{
+        position: 'absolute',
+        left: x,
+        width: size,
+        height: size,
+        pointerEvents: 'none',
+        userSelect: 'none',
+      }}
+      initial={{ y: 870, opacity: 0 }}
+      animate={fading
+        ? { y: targetY, opacity: 0 }
+        : { y: targetY, opacity: 1 }}
+      transition={fading
+        ? { y: { duration: 0 }, opacity: { duration: 0.4, delay: fadeOrder * 0.13 } }
+        : {
+            y: { duration: 1.3, delay: riseDelay, ease: [0.25, 0.46, 0.45, 0.94] },
+            opacity: { duration: 0.4, delay: riseDelay },
+          }}
+    />
+  );
+}
+
+function EmojiFloatEffect({ triggerKey }) {
+  const [active, setActive] = useState(false);
+  const [fading, setFading] = useState(false);
+  const prevKeyRef = useRef(triggerKey);
+
+  useEffect(() => {
+    if (triggerKey === prevKeyRef.current) return;
+    prevKeyRef.current = triggerKey;
+    setActive(true);
+    setFading(false);
+    const t1 = setTimeout(() => setFading(true), 2600);
+    const t2 = setTimeout(() => setActive(false), 4400);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [triggerKey]);
+
+  if (!active) return null;
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 20 }}>
+      {EMOJI_FLOAT_ITEMS.map((item, i) => (
+        <EmojiFloatItem key={i} {...item} fading={fading} />
+      ))}
+    </div>
+  );
+}
+
 // --- Main Page Component ---
-export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0, syncRows = false }) {
+export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0, syncRows = false, emojiFloat = false }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
@@ -1149,6 +1327,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
   const [panelText, setPanelText] = useState('');         // controlled text for the input panel
   const [danmakuLikes, setDanmakuLikes] = useState({});  // { [key]: count }
   const [showSentToast, setShowSentToast] = useState(false);
+  const [emojiFloatTrigger, setEmojiFloatTrigger] = useState(0);
 
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -1186,8 +1365,8 @@ export default function TikTokHome({ className, videoSrc, username, description,
     popupTimerRef.current = setTimeout(dismissPopup, 6000);
   }
 
-  function handlePlusOne(key) {
-    setPlusOneSent(prev => new Set([...prev, key]));
+  function handlePlusOne(key, text) {
+    setPlusOneSent(prev => new Set([...prev, text]));
     setShowSentToast(true);
     clearTimeout(sentToastTimerRef.current);
     sentToastTimerRef.current = setTimeout(() => setShowSentToast(false), 1800);
@@ -1195,7 +1374,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
 
   function handleDanmakuClick(e, key, rowIndex, text, isPlusOne) {
     e.stopPropagation();
-    if (isPlusOne) { handlePlusOne(key); return; }
+    if (isPlusOne) { handlePlusOne(key, text); return; }
     if (danmakuPopup?.key === key) { dismissPopup(); return; }
     const containerRect = containerRef.current.getBoundingClientRect();
     const itemRect = e.currentTarget.getBoundingClientRect();
@@ -1315,6 +1494,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
           plusOneSent={plusOneSent}
           plusOneTextSet={plusOneTextSet}
           syncRows={syncRows}
+          onUserDanmakuAppear={emojiFloat ? (text) => { if (text === '接接接') setEmojiFloatTrigger(v => v + 1); } : undefined}
         />
       )}
 
@@ -1368,6 +1548,9 @@ export default function TikTokHome({ className, videoSrc, username, description,
           currentLikeCount={(danmakuPopup.baseCount || 20) + (danmakuLikes[danmakuPopup.key] ? 1 : 0)}
         />
       )}
+
+      {/* Emoji float effect — triggered when user sends "接接接" */}
+      {emojiFloat && <EmojiFloatEffect triggerKey={emojiFloatTrigger} />}
 
       {/* Right action panel */}
       <ActionPanel avatarSrc={avatarSrc} />

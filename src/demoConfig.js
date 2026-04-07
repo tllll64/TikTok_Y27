@@ -202,6 +202,7 @@ const DEMOS = [
   {
     slide: 10,
     label: 'O2 | xxx',
+    emojiFloat: true,
     video: 'usecase5-1.mov',
     avatar: 'usecase5-1.jpg',
     username: '@小笼包（见过两次版）',

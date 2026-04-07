@@ -304,6 +304,7 @@ function PhoneContent({ current, demo }) {
         plusOneTextSet={new Set((demo.danmakus ?? []).filter(d => d.plusOne).map(d => d.text))}
         disclaimerMaskHeight={demo.disclaimerMaskHeight ?? 0}
         syncRows={demo.syncRows ?? false}
+        emojiFloat={demo.emojiFloat ?? false}
       />
     );
   }
