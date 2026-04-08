@@ -480,60 +480,61 @@ function FigmaSlide() {
   return (
     <div style={{
       width: '100vw', height: '100vh', background: '#111',
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', overflow: 'hidden',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      overflow: 'hidden',
     }}>
-      {/* Title */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
-        style={{
-          flexShrink: 0,
-          padding: '36px 0 24px',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-        }}
-      >
-        <div style={{
-          display: 'inline-flex', alignItems: 'center',
-          padding: '5px 14px',
-          border: '1.5px solid rgba(255,255,255,0.4)',
-          borderRadius: 20,
-        }}>
-          <span style={{
-            fontFamily: '"PingFang SC", sans-serif',
-            fontSize: 13, fontWeight: 400, color: '#fff',
-          }}>设计说明文档</span>
-        </div>
-        <div style={{
-          fontFamily: '"PingFang SC", sans-serif',
-          fontSize: 28, fontWeight: 600, color: '#fff',
-        }}>
-          Y27 · 抖音弹幕优化
-        </div>
-      </motion.div>
-
-      {/* Figma iframe */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.32, ease: 'easeOut' }}
-        style={{
-          flex: 1, width: '100%', minHeight: 0,
-          padding: '0 40px 36px',
-          boxSizing: 'border-box',
-        }}
-      >
-        <iframe
-          src={FIGMA_EMBED_URL}
+      {/* 80% scaled container */}
+      <div style={{
+        width: '80vw', height: '80vh',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+      }}>
+        {/* Title */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
           style={{
-            width: '100%', height: '100%',
-            border: 'none',
-            borderRadius: 12,
+            flexShrink: 0,
+            paddingBottom: 20,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
           }}
-          allowFullScreen
-        />
-      </motion.div>
+        >
+          <div style={{
+            display: 'inline-flex', alignItems: 'center',
+            padding: '5px 14px',
+            border: '1.5px solid rgba(255,255,255,0.4)',
+            borderRadius: 20,
+          }}>
+            <span style={{
+              fontFamily: '"PingFang SC", sans-serif',
+              fontSize: 13, fontWeight: 400, color: '#fff',
+            }}>设计说明文档</span>
+          </div>
+          <div style={{
+            fontFamily: '"PingFang SC", sans-serif',
+            fontSize: 28, fontWeight: 600, color: '#fff',
+          }}>
+            Y27 · 抖音弹幕优化
+          </div>
+        </motion.div>
+
+        {/* Figma iframe */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.32, ease: 'easeOut' }}
+          style={{ flex: 1, width: '100%', minHeight: 0 }}
+        >
+          <iframe
+            src={FIGMA_EMBED_URL}
+            style={{
+              width: '100%', height: '100%',
+              border: 'none', borderRadius: 12,
+            }}
+            allowFullScreen
+          />
+        </motion.div>
+      </div>
     </div>
   );
 }
