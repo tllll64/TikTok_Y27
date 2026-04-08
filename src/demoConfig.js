@@ -254,6 +254,7 @@ const DEMOS = [
     label: 'O2 | xxx',
     kiteDanmaku: true,
     disableCounter: true,
+    willowLeaf: true,
     video: 'usecase6.mov',
     avatar: 'usecase6.jpg',
     username: '子扬ZYang',

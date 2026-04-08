@@ -37,6 +37,15 @@ import _imgLineV from './assets/figma/c3fe03a98e9323cc849182eb98e2c1b6f4db0af8.s
 import _imgEmojiIcon from './assets/figma/6b56da5448d7da479e8d2fc1f307d911d116a58a.svg';
 import _imgKeyboard from './assets/figma/c32ffaa71da99de73b376ad5eda6a9abafad4160.svg';
 import _imgEmojiFloat from './assets/figma/78f7959e06dfc9c60e05998c7ad557ceb85ebc93.png';
+import _imgWillow1 from './assets/figma/willow-1.png';
+import _imgWillow2 from './assets/figma/willow-2.png';
+import _imgWillow3 from './assets/figma/willow-3.png';
+import _imgWillow4 from './assets/figma/willow-4.png';
+import _imgWillow5 from './assets/figma/willow-5.png';
+import _imgWillow6 from './assets/figma/willow-6.png';
+import _imgWillow7 from './assets/figma/willow-7.png';
+import _imgWillow8 from './assets/figma/willow-8.png';
+const _WILLOW_SRCS = [_imgWillow1, _imgWillow2, _imgWillow3, _imgWillow4, _imgWillow5, _imgWillow6, _imgWillow7, _imgWillow8];
 import _imgKiteBird   from './assets/figma/kite-bird.png';
 import _imgKiteRope   from './assets/figma/kite-rope.png';
 import _imgKitePaperTop    from './assets/figma/kite-paper-top.png';
@@ -1055,7 +1064,10 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
       entry = { key: `u-${u.id}`, text: u.text, isUser: !u.isPreset, origId: u.id, baseCount, isPlusOne: u.isPlusOne ?? false, featured: u.featured ?? false, replies: u.replies ?? 0, firedAt: now };
     } else {
       const pool = bgTexts ?? BG_TEXTS[rowIndex];
-      const txt = pool[bgIndex.current % pool.length];
+      // 过滤掉用户已通过 +1 发送过的文本，避免后续循环中重复出现
+      const filteredPool = plusOneSent?.size > 0 ? pool.filter(t => !plusOneSent.has(t)) : pool;
+      const activePool = filteredPool.length > 0 ? filteredPool : pool;
+      const txt = activePool[bgIndex.current % activePool.length];
       bgIndex.current++;
       entry = { key: `bg-${rowIndex}-${now}`, text: txt, isUser: false, baseCount, isPlusOne: plusOneTextSet?.has(txt) ?? false, firedAt: now };
     }
@@ -1330,6 +1342,56 @@ const KITE_ROPE_H         = 74;
 const KITE_BIRD_W         = 124;
 const KITE_BIRD_H         = 94;
 
+// ── 柳絮飘落效果 ─────────────────────────────────────────────
+const WILLOW_LEAF_ITEMS = [
+  { id: 0, img: 0, x: 22,  size: 50, delay: 1.0, duration: 5.5, drift: 22,  startY:  60 },
+  { id: 1, img: 2, x: 118, size: 38, delay: 2.6, duration: 4.8, drift: -28, startY: -38 },
+  { id: 2, img: 4, x: 215, size: 46, delay: 1.8, duration: 6.2, drift:  32, startY: 320 },
+  { id: 3, img: 1, x: 305, size: 36, delay: 3.3, duration: 5.0, drift: -22, startY: -36 },
+  { id: 4, img: 6, x: 68,  size: 44, delay: 4.4, duration: 5.8, drift: -26, startY: -44 },
+  { id: 5, img: 3, x: 262, size: 50, delay: 2.1, duration: 4.6, drift:  20, startY: 190 },
+  { id: 6, img: 7, x: 158, size: 34, delay: 3.9, duration: 5.4, drift: -18, startY: -34 },
+  { id: 7, img: 5, x: 338, size: 42, delay: 1.4, duration: 6.0, drift:  24, startY: 490 },
+];
+
+// triggerKey 变化时重新挂载，播放一次后自然结束（不循环）
+function WillowLeafEffect({ triggerKey }) {
+  return (
+    <div
+      key={triggerKey}
+      style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 20, overflow: 'hidden' }}
+    >
+      {WILLOW_LEAF_ITEMS.map(({ id, img, x, size, delay, duration, drift, startY }) => (
+        <motion.img
+          key={id}
+          src={_WILLOW_SRCS[img]}
+          style={{
+            position: 'absolute',
+            left: x,
+            top: 0,
+            width: size,
+            height: 'auto',
+            pointerEvents: 'none',
+          }}
+          initial={{ y: startY ?? -size, opacity: 0 }}
+          animate={{
+            y: 844 + size,
+            x: [0, drift, -drift / 2, drift / 3, 0],
+            opacity: [0, 0.9, 0.9, 0],
+          }}
+          transition={{
+            duration,
+            delay,
+            y:       { ease: 'linear', duration },
+            x:       { ease: 'easeInOut', times: [0, 0.3, 0.6, 0.85, 1], duration },
+            opacity: { times: [0, 0.08, 0.88, 1], duration },
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function KiteDanmakuItem({ text, onDone }) {
   const midH = Math.min(KITE_PAPER_MID_MAX, Math.max(KITE_PAPER_MID_MIN, text.length * 18));
   const paperH = KITE_PAPER_TOP_H + midH + KITE_PAPER_BOTTOM_H;
@@ -1468,7 +1530,7 @@ function KiteDanmakuEffect({ triggerText }) {
 }
 
 // --- Main Page Component ---
-export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0, syncRows = false, emojiFloat = false, kiteDanmaku = false, disableCounter = false }) {
+export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0, syncRows = false, emojiFloat = false, kiteDanmaku = false, disableCounter = false, willowLeaf = false }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
@@ -1482,6 +1544,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
   const [showSentToast, setShowSentToast] = useState(false);
   const [emojiFloatTrigger, setEmojiFloatTrigger] = useState(0);
   const [kiteDanmakuText, setKiteDanmakuText] = useState(null);
+  const [willowLeafTrigger, setWillowLeafTrigger] = useState(0);
 
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -1496,8 +1559,9 @@ export default function TikTokHome({ className, videoSrc, username, description,
     setPanelText('');
     setDanmakuOpen(false);
     if (kiteDanmaku) {
-      // 等风筝完全消失后（7.5s）再让普通弹幕飘入
+      // 等风筝完全消失后（6.5s）再让普通弹幕飘入
       setKiteDanmakuText({ text: text.trim(), id: Date.now() });
+      if (willowLeaf) setWillowLeafTrigger(prev => prev + 1);
       setTimeout(() => {
         setUserDanmakus(prev => [...prev, { id, text, row }]);
       }, 6500);
@@ -1711,6 +1775,9 @@ export default function TikTokHome({ className, videoSrc, username, description,
           currentLikeCount={(danmakuPopup.baseCount || 20) + (danmakuLikes[danmakuPopup.key] ? 1 : 0)}
         />
       )}
+
+      {/* Willow leaf falling effect — only when kite danmaku is triggered */}
+      {willowLeaf && willowLeafTrigger > 0 && <WillowLeafEffect key={willowLeafTrigger} triggerKey={willowLeafTrigger} />}
 
       {/* Emoji float effect — triggered when user sends "接接接" */}
       {emojiFloat && <EmojiFloatEffect triggerKey={emojiFloatTrigger} />}

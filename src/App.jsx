@@ -307,6 +307,7 @@ function PhoneContent({ current, demo }) {
         emojiFloat={demo.emojiFloat ?? false}
         kiteDanmaku={demo.kiteDanmaku ?? false}
         disableCounter={demo.disableCounter ?? false}
+        willowLeaf={demo.willowLeaf ?? false}
       />
     );
   }
