@@ -327,3 +327,8 @@ DEMOS.forEach(demo => {
 });
 
 export default DEMOS;
+
+// 数据文件不支持 HMR 局部热替换，变更时强制整页刷新以确保 label 等数据同步
+if (import.meta.hot) {
+  import.meta.hot.decline();
+}
