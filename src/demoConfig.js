@@ -17,9 +17,22 @@
 
 const DEMOS = [
   {
+    slide: 0,
+    label: '弹幕优化展示',
+    info: {
+      tag: '功能概览',
+      title: '这是一个标题描述',
+      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是一个描述\n这是一个描述这是一个描述这是一个描述这是一个描述',
+    },
+  },
+  {
     slide: 2,
     label: '功能1 | 弹幕跟发',
-    leftPanel: true,
+    info: {
+      tag: '功能 1',
+      title: '这是一个标题描述',
+      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是一个描述\n这是一个描述这是一个描述这是一个描述这是一个描述',
+    },
     disableCounter: true,
     video: 'usecase1.mov',
     avatar: 'usecase1.jpg',
@@ -65,6 +78,11 @@ const DEMOS = [
   {
     slide: 3,
     label: '功能2 | 弹幕+1发送',
+    info: {
+      tag: '功能 2',
+      title: '这是一个标题描述',
+      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是一个描述\n这是一个描述这是一个描述这是一个描述这是一个描述',
+    },
     disableCounter: true,
     video: 'usecase2.mov',
     avatar: 'usecase2.jpg',
@@ -110,6 +128,11 @@ const DEMOS = [
   {
     slide: 4,
     label: '功能3 | 评论精选弹幕',
+    info: {
+      tag: '功能 3',
+      title: '这是一个标题描述',
+      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是一个描述\n这是一个描述这是一个描述这是一个描述这是一个描述',
+    },
     disableCounter: true,
     video: 'usecase3.mov',
     avatar: 'usecase3.jpg',
@@ -157,6 +180,11 @@ const DEMOS = [
     {
     slide: 5,
     label: '功能4| 聚合相同弹幕',
+    info: {
+      tag: '功能 4',
+      title: '这是一个标题描述',
+      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是一个描述\n这是一个描述这是一个描述这是一个描述这是一个描述',
+    },
     video: 'usecase4.mov',
     avatar: 'usecase4.png',
     username: '@尖端锐评玩家',
@@ -206,6 +234,11 @@ const DEMOS = [
     {
     slide: 6,
     label: '功能5 |表情外延弹幕',
+    info: {
+      tag: '功能 5',
+      title: '这是一个标题描述',
+      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是一个描述\n这是一个描述这是一个描述这是一个描述这是一个描述',
+    },
     disableCounter: true,
     emojiFloat: true,
     video: 'usecase5-1.mov',
@@ -256,6 +289,11 @@ const DEMOS = [
     {
     slide: 7,
     label: '功能6 | 热点弹幕玩法',
+    info: {
+      tag: '功能 6',
+      title: '这是一个标题描述',
+      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是一个描述\n这是一个描述这是一个描述这是一个描述这是一个描述',
+    },
     kiteDanmaku: true,
     disableCounter: true,
     willowLeaf: true,

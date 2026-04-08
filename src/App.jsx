@@ -25,6 +25,7 @@ function avatarAsset(filename) {
 // Scale bezel so its screen cutout (402×874 in original 450×920) matches content (390×844) exactly.
 const BEZEL_W = Math.round(450 * 390 / 402);
 const BEZEL_H = Math.round(920 * 844 / 874);
+const PHONE_SCALE = 0.75; // demo display scale
 const CONTENT_X = Math.round(24 * 390 / 402);
 const CONTENT_Y = Math.round(23 * 844 / 874);
 
@@ -149,6 +150,68 @@ function Slide6LeftPanel() {
   );
 }
 
+// ── Slide left info panel ─────────────────────────────────────────────────────
+function SlideInfoPanel({ tag, title, description }) {
+  return (
+    <div style={{
+      position: 'absolute',
+      left: 80,
+      top: '50%',
+      transform: 'translateY(-50%)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 20,
+      maxWidth: 420,
+      pointerEvents: 'none',
+      userSelect: 'none',
+    }}>
+      {/* Tag pill */}
+      <div style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: '5px 14px',
+        border: '1.5px solid rgba(255,255,255,0.75)',
+        borderRadius: 20,
+        width: 'fit-content',
+      }}>
+        <span style={{
+          fontFamily: '"PingFang SC", sans-serif',
+          fontSize: 13,
+          fontWeight: 400,
+          color: '#FFFFFF',
+          lineHeight: 'normal',
+        }}>
+          {tag}
+        </span>
+      </div>
+
+      {/* Title */}
+      <div style={{
+        fontFamily: '"PingFang SC", sans-serif',
+        fontSize: 32,
+        fontWeight: 600,
+        color: '#FFFFFF',
+        lineHeight: 1.4,
+        whiteSpace: 'pre-line',
+      }}>
+        {title}
+      </div>
+
+      {/* Description */}
+      <div style={{
+        fontFamily: '"PingFang SC", sans-serif',
+        fontSize: 15,
+        fontWeight: 400,
+        color: 'rgba(255,255,255,0.55)',
+        lineHeight: 1.8,
+        whiteSpace: 'pre-line',
+      }}>
+        {description}
+      </div>
+    </div>
+  );
+}
+
 // ── Full-slide wrapper ────────────────────────────────────────────────────────
 // Phone stays at natural size; left panel scales to fit; the pair is centred.
 // LEFT_PANEL_CLIP: clip right edge of panel at this x in reference space.
@@ -162,7 +225,7 @@ function FullSlide({ leftPanel, children }) {
   useEffect(() => {
     const update = () => {
       const margin = 40;
-      const leftWidth = window.innerWidth - margin * 2 - BEZEL_W - PANEL_PHONE_GAP;
+      const leftWidth = window.innerWidth - margin * 2 - BEZEL_W * PHONE_SCALE - PANEL_PHONE_GAP;
       const s = Math.min(
         leftWidth / LEFT_PANEL_CLIP,
         window.innerHeight / SLIDE_H,
@@ -198,9 +261,11 @@ function FullSlide({ leftPanel, children }) {
         </div>
       </div>
 
-      {/* Phone at natural size */}
-      <div style={{ flexShrink: 0 }}>
-        {children}
+      {/* Phone at scaled size */}
+      <div style={{ flexShrink: 0, width: BEZEL_W * PHONE_SCALE, height: BEZEL_H * PHONE_SCALE }}>
+        <div style={{ transform: `scale(${PHONE_SCALE})`, transformOrigin: 'top left', width: BEZEL_W, height: BEZEL_H }}>
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -343,9 +408,23 @@ export default function App() {
       ) : (
         <div style={{
           minHeight: '100vh', background: '#111',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+          paddingRight: `calc(33.33vw - ${Math.round(BEZEL_W * PHONE_SCALE / 2)}px)`,
+          position: 'relative',
+          overflow: 'hidden',
         }}>
-          <PhoneFrame>{phoneContent}</PhoneFrame>
+          {demo?.info && (
+            <SlideInfoPanel
+              tag={demo.info.tag}
+              title={demo.info.title}
+              description={demo.info.description}
+            />
+          )}
+          <div style={{ width: BEZEL_W * PHONE_SCALE, height: BEZEL_H * PHONE_SCALE, flexShrink: 0 }}>
+            <div style={{ transform: `scale(${PHONE_SCALE})`, transformOrigin: 'top left', width: BEZEL_W, height: BEZEL_H }}>
+              <PhoneFrame>{phoneContent}</PhoneFrame>
+            </div>
+          </div>
         </div>
       )}
       <SlideNav current={current} onSelect={setCurrent} slides={SLIDES} />
