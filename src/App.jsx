@@ -662,13 +662,9 @@ export default function App() {
       {/* Nav dots — rendered above the animated layer */}
       <SlideNav current={current} onSelect={handleSelect} slides={SLIDES} />
 
-      {/* 滚动触发预加载：预缓冲后续 2 页的视频，用户翻页时已就绪 */}
-      {[1, 2].map(offset => {
-        const idx = SLIDES.findIndex(s => s.id === current) + offset;
-        if (idx >= SLIDES.length) return null;
-        const nextDemo = DEMO_MAP[SLIDES[idx].id];
-        if (!nextDemo?.video) return null;
-        const url = videoAsset(nextDemo.video);
+      {/* 页面加载时预缓冲所有视频，用户翻页时已就绪 */}
+      {DEMOS.filter(d => d.video).map(d => {
+        const url = videoAsset(d.video);
         if (!url) return null;
         return (
           <video
