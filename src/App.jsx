@@ -472,6 +472,72 @@ function PhoneContent({ current, demo, slides }) {
   );
 }
 
+// ── Figma embed slide ─────────────────────────────────────────────────────────
+const FIGMA_EMBED_URL = 'https://www.figma.com/embed?embed_host=share&url=' +
+  encodeURIComponent('https://www.figma.com/proto/H9iUsuS0iyuVoEVjVb2KIU/Y27-TikTok?node-id=1-2952&p=f&viewport=161%2C200%2C0.38&t=bxPDvzOrgbWUIJWV-1&scaling=scale-down&content-scaling=fixed&page-id=0%3A1');
+
+function FigmaSlide() {
+  return (
+    <div style={{
+      width: '100vw', height: '100vh', background: '#111',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', overflow: 'hidden',
+    }}>
+      {/* Title */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
+        style={{
+          flexShrink: 0,
+          padding: '36px 0 24px',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+        }}
+      >
+        <div style={{
+          display: 'inline-flex', alignItems: 'center',
+          padding: '5px 14px',
+          border: '1.5px solid rgba(255,255,255,0.4)',
+          borderRadius: 20,
+        }}>
+          <span style={{
+            fontFamily: '"PingFang SC", sans-serif',
+            fontSize: 13, fontWeight: 400, color: '#fff',
+          }}>设计说明文档</span>
+        </div>
+        <div style={{
+          fontFamily: '"PingFang SC", sans-serif',
+          fontSize: 28, fontWeight: 600, color: '#fff',
+        }}>
+          Y27 · 抖音弹幕优化
+        </div>
+      </motion.div>
+
+      {/* Figma iframe */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.32, ease: 'easeOut' }}
+        style={{
+          flex: 1, width: '100%', minHeight: 0,
+          padding: '0 40px 36px',
+          boxSizing: 'border-box',
+        }}
+      >
+        <iframe
+          src={FIGMA_EMBED_URL}
+          style={{
+            width: '100%', height: '100%',
+            border: 'none',
+            borderRadius: 12,
+          }}
+          allowFullScreen
+        />
+      </motion.div>
+    </div>
+  );
+}
+
 // ── Slide transition variants ─────────────────────────────────────────────────
 const SLIDE_VARIANTS = {
   enter: (dir) => ({ y: dir > 0 ? '100%' : '-100%' }),
@@ -485,9 +551,9 @@ const SLIDE_TRANSITION = {
 export default function App() {
   // 放在组件内，确保 demoConfig.js 热更新后 label 能同步刷新
   const DEMO_MAP = Object.fromEntries(DEMOS.map(d => [d.slide, d]));
-  const SLIDES = [0, 2, 3, 4, 5, 6, 7].map(i => ({
+  const SLIDES = [0, 1, 2, 3, 4, 5, 6, 7].map(i => ({
     id: i,
-    label: DEMO_MAP[i]?.label ?? (i === 0 ? '弹幕优化展示' : `页面 ${i + 1}`),
+    label: DEMO_MAP[i]?.label ?? (i === 0 ? '弹幕玩法说明' : i === 1 ? '设计说明文档' : `页面 ${i + 1}`),
   }));
 
   const [current, setCurrent] = useState(0);
@@ -541,6 +607,7 @@ export default function App() {
     setTimeout(() => { lockRef.current = false; }, 600);
   }
 
+  const isFigmaSlide = current === 1;
   const demo         = DEMO_MAP[current];
   const hasLeftPanel = demo?.leftPanel === true;
   const phoneContent = <PhoneContent current={current} demo={demo} slides={SLIDES} />;
@@ -560,7 +627,9 @@ export default function App() {
             transition={SLIDE_TRANSITION}
             style={{ position: 'absolute', inset: 0, willChange: 'transform' }}
           >
-            {hasLeftPanel ? (
+            {isFigmaSlide ? (
+              <FigmaSlide />
+            ) : hasLeftPanel ? (
               <FullSlide leftPanel={
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -599,6 +668,7 @@ export default function App() {
               </div>
             )}
           </motion.div>
+
         </AnimatePresence>
       </div>
 
