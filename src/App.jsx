@@ -21,14 +21,6 @@ function avatarAsset(filename) {
   return mod ? mod.default : null;
 }
 
-// Build SLIDES array — demo pages get their label from demoConfig, others get a default
-const DEMO_MAP = Object.fromEntries(DEMOS.map(d => [d.slide, d]));
-
-// 只保留有重点功能的页面：页面1（slide 0）+ demo 页面（slide 6-11）
-const SLIDES = [0, 6, 7, 8, 9, 10, 11].map(i => ({
-  id: i,
-  label: DEMO_MAP[i]?.label ?? (i === 0 ? '弹幕优化展示' : `页面 ${i + 1}`),
-}));
 
 // Scale bezel so its screen cutout (402×874 in original 450×920) matches content (390×844) exactly.
 const BEZEL_W = Math.round(450 * 390 / 402);
@@ -214,7 +206,7 @@ function FullSlide({ leftPanel, children }) {
   );
 }
 
-function SlideNav({ current, onSelect }) {
+function SlideNav({ current, onSelect, slides }) {
   const [hovered, setHovered] = useState(null);
 
   return (
@@ -226,12 +218,12 @@ function SlideNav({ current, onSelect }) {
       }}
       onMouseLeave={() => setHovered(null)}
     >
-      {SLIDES.map((slide, index) => {
+      {slides.map((slide, index) => {
         const isActive = current === slide.id;
         const isHovered = hovered === slide.id;
         let distance = 0;
         if (hovered !== null) {
-          const hoveredIndex = SLIDES.findIndex(s => s.id === hovered);
+          const hoveredIndex = slides.findIndex(s => s.id === hovered);
           distance = Math.abs(index - hoveredIndex);
         }
         let size = isActive ? 10 : 8;
@@ -286,7 +278,7 @@ function SlideNav({ current, onSelect }) {
   );
 }
 
-function PhoneContent({ current, demo }) {
+function PhoneContent({ current, demo, slides }) {
   if (current === 0) return <TikTokHome key="slide-0" />;
   if (demo) {
     return (
@@ -320,20 +312,27 @@ function PhoneContent({ current, demo }) {
     }}>
       <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 48 }}>{current + 1}</div>
       <div style={{ color: 'rgba(255,255,255,0.15)', fontSize: 14, fontFamily: '"PingFang SC", sans-serif' }}>
-        {SLIDES[current].label}
+        {slides.find(s => s.id === current)?.label}
       </div>
     </div>
   );
 }
 
 export default function App() {
+  // 放在组件内，确保 demoConfig.js 热更新后 label 能同步刷新
+  const DEMO_MAP = Object.fromEntries(DEMOS.map(d => [d.slide, d]));
+  const SLIDES = [0, 6, 7, 8, 9, 10, 11].map(i => ({
+    id: i,
+    label: DEMO_MAP[i]?.label ?? (i === 0 ? '弹幕优化展示' : `页面 ${i + 1}`),
+  }));
+
   const [current, setCurrent] = useState(0);
   const demo = DEMO_MAP[current];
 
   // Slides that use the full 1920×1080 layout with a left panel
   const hasLeftPanel = demo?.leftPanel === true;
 
-  const phoneContent = <PhoneContent current={current} demo={demo} />;
+  const phoneContent = <PhoneContent current={current} demo={demo} slides={SLIDES} />;
 
   return (
     <>
@@ -349,7 +348,7 @@ export default function App() {
           <PhoneFrame>{phoneContent}</PhoneFrame>
         </div>
       )}
-      <SlideNav current={current} onSelect={setCurrent} />
+      <SlideNav current={current} onSelect={setCurrent} slides={SLIDES} />
     </>
   );
 }
