@@ -24,7 +24,8 @@ function avatarAsset(filename) {
 // Build SLIDES array — demo pages get their label from demoConfig, others get a default
 const DEMO_MAP = Object.fromEntries(DEMOS.map(d => [d.slide, d]));
 
-const SLIDES = Array.from({ length: 14 }, (_, i) => ({
+// 只保留有重点功能的页面：页面1（slide 0）+ demo 页面（slide 6-11）
+const SLIDES = [0, 6, 7, 8, 9, 10, 11].map(i => ({
   id: i,
   label: DEMO_MAP[i]?.label ?? (i === 0 ? '弹幕优化展示' : `页面 ${i + 1}`),
 }));

@@ -151,7 +151,7 @@ const DEMOS = [
     ],
   },
 
-    {
+  {
     slide: 9,
     label: 'O2 | 评论精选弹幕',
     video: 'usecase4.mov',
@@ -200,7 +200,7 @@ const DEMOS = [
   },
 
 
-    {
+  {
     slide: 10,
     label: 'O2 | xxx',
     emojiFloat: true,
@@ -249,7 +249,7 @@ const DEMOS = [
     ],
   },
 
-    {
+  {
     slide: 11,
     label: 'O2 | xxx',
     kiteDanmaku: true,
