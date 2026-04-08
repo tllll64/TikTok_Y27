@@ -490,14 +490,14 @@ function FigmaSlide() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
-        style={{ width: '76.8vw', height: '96vh', position: 'relative' }}
+        style={{ width: '100vw', height: '100vh', position: 'relative' }}
       >
           <iframe
             src={FIGMA_EMBED_URL}
             onLoad={() => setIframeLoaded(true)}
             style={{
               width: '100%', height: '100%',
-              border: 'none', borderRadius: 12,
+              border: 'none',
             }}
             allowFullScreen
           />
