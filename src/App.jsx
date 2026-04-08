@@ -661,6 +661,26 @@ export default function App() {
 
       {/* Nav dots — rendered above the animated layer */}
       <SlideNav current={current} onSelect={handleSelect} slides={SLIDES} />
+
+      {/* 滚动触发预加载：预缓冲后续 2 页的视频，用户翻页时已就绪 */}
+      {[1, 2].map(offset => {
+        const idx = SLIDES.findIndex(s => s.id === current) + offset;
+        if (idx >= SLIDES.length) return null;
+        const nextDemo = DEMO_MAP[SLIDES[idx].id];
+        if (!nextDemo?.video) return null;
+        const url = videoAsset(nextDemo.video);
+        if (!url) return null;
+        return (
+          <video
+            key={url}
+            src={url}
+            preload="auto"
+            muted
+            playsInline
+            style={{ display: 'none', position: 'absolute', pointerEvents: 'none' }}
+          />
+        );
+      })}
     </>
   );
 }
