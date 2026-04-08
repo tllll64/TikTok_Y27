@@ -490,7 +490,7 @@ function FigmaSlide() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
-        style={{ width: '64vw', height: '80vh', position: 'relative' }}
+        style={{ width: '76.8vw', height: '96vh', position: 'relative' }}
       >
           <iframe
             src={FIGMA_EMBED_URL}
