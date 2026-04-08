@@ -795,7 +795,7 @@ function PlusOneIcon() {
       <path d="M15.7537 3.70244C15.9845 3.70244 16.1979 3.82584 16.3133 4.02568C16.4287 4.22553 16.4286 4.47131 16.3133 4.67119L13.1356 10.6272C11.4435 10.4925 9.68366 11.2665 8.63165 12.556C8.25915 13.0126 7.9714 13.5383 7.80646 14.1155L7.20392 11.0472C7.12606 10.7994 7.20425 10.5287 7.40216 10.3606L11.2479 7.09892C11.2919 7.06153 11.2971 7.03539 11.2986 7.02372C11.3012 7.00357 11.2964 6.96984 11.2752 6.93388C11.2541 6.89846 11.2276 6.87895 11.2088 6.87138C11.1979 6.86706 11.1721 6.85861 11.118 6.87919L6.43439 8.65947C6.18643 8.75357 5.90596 8.68657 5.72735 8.49052L2.0838 6.21122C1.91183 6.02211 1.86728 5.74876 1.97052 5.51494C2.07392 5.28107 2.30663 5.13026 2.56232 5.13017L15.7537 3.70244Z" fill="white"/>
       <path d="M10.5838 16.4988L10.8309 15.1129H9.47725L9.70287 13.8451H11.0565L11.2929 12.5129H12.5606L12.3243 13.8451H13.6887L13.4631 15.1129H12.0987L11.8516 16.4988H10.5838Z" fill="white"/>
       <path d="M16.8182 17.1649H15.5218L16.1306 13.727C16.016 13.9132 15.8059 14.0922 15.5003 14.2641C15.1947 14.436 14.8748 14.522 14.5405 14.522L14.4474 13.3187C14.8963 13.3187 15.3165 13.1826 15.708 12.9105C16.0995 12.6335 16.3407 12.3327 16.4314 12.008H17.7206L16.8182 17.1649Z" fill="white"/>
-      <path d="M18.0181 11.7581L17.9673 12.0511L17.064 17.2083L17.0278 17.4153H15.2231L15.2759 17.1214L15.7573 14.3977C15.7134 14.4252 15.6696 14.4553 15.6226 14.4817C15.2815 14.6736 14.9198 14.7718 14.5405 14.7718H14.3091L14.2915 14.5413L14.1978 13.3382L14.1772 13.0686H14.4478C14.8421 13.0686 15.2127 12.9501 15.5649 12.7054C15.9281 12.4482 16.1211 12.1905 16.1909 11.9407L16.2417 11.7581H18.0181ZM12.8589 12.263L12.8071 12.5569L12.6226 13.595H13.9868L13.9351 13.889L13.7095 15.1565L13.6724 15.3626H12.3081L12.0981 16.5423L12.061 16.7483H10.2856L10.3374 16.4554L10.5317 15.3626H9.1792L9.23096 15.0686L9.45654 13.8011L9.49365 13.595H10.8462L11.0464 12.469L11.0835 12.263H12.8589ZM15.7534 3.45244C16.0737 3.45244 16.3698 3.62366 16.5298 3.90068L16.5825 4.00712C16.6866 4.25948 16.669 4.54724 16.5327 4.78837L16.5337 4.78935L13.356 10.7454L13.2788 10.8899L13.1157 10.8763C11.507 10.7481 9.82672 11.4872 8.82568 12.7142C8.47271 13.1468 8.2012 13.6422 8.04639 14.1839L7.56104 14.1634L6.9585 11.095V11.094C6.86466 10.7581 6.9736 10.3971 7.24072 10.1702L10.5522 7.36064L6.52295 8.89286C6.19367 9.01783 5.82503 8.93647 5.57666 8.69072L1.95166 6.42314L1.92236 6.40458L1.89893 6.37919C1.66064 6.1171 1.59869 5.73863 1.7417 5.41435V5.41337C1.88179 5.09688 2.19221 4.8924 2.53564 4.88212V4.88115L15.7271 3.45341L15.7397 3.45244H15.7534Z" fill="none" stroke="rgba(0,0,0,0.75)" strokeWidth="0.5"/>
+      <path d="M18.0181 11.7581L17.9673 12.0511L17.064 17.2083L17.0278 17.4153H15.2231L15.2759 17.1214L15.7573 14.3977C15.7134 14.4252 15.6696 14.4553 15.6226 14.4817C15.2815 14.6736 14.9198 14.7718 14.5405 14.7718H14.3091L14.2915 14.5413L14.1978 13.3382L14.1772 13.0686H14.4478C14.8421 13.0686 15.2127 12.9501 15.5649 12.7054C15.9281 12.4482 16.1211 12.1905 16.1909 11.9407L16.2417 11.7581H18.0181ZM12.8589 12.263L12.8071 12.5569L12.6226 13.595H13.9868L13.9351 13.889L13.7095 15.1565L13.6724 15.3626H12.3081L12.0981 16.5423L12.061 16.7483H10.2856L10.3374 16.4554L10.5317 15.3626H9.1792L9.23096 15.0686L9.45654 13.8011L9.49365 13.595H10.8462L11.0464 12.469L11.0835 12.263H12.8589ZM15.7534 3.45244C16.0737 3.45244 16.3698 3.62366 16.5298 3.90068L16.5825 4.00712C16.6866 4.25948 16.669 4.54724 16.5327 4.78837L16.5337 4.78935L13.356 10.7454L13.2788 10.8899L13.1157 10.8763C11.507 10.7481 9.82672 11.4872 8.82568 12.7142C8.47271 13.1468 8.2012 13.6422 8.04639 14.1839L7.56104 14.1634L6.9585 11.095V11.094C6.86466 10.7581 6.9736 10.3971 7.24072 10.1702L10.5522 7.36064L6.52295 8.89286C6.19367 9.01783 5.82503 8.93647 5.57666 8.69072L1.95166 6.42314L1.92236 6.40458L1.89893 6.37919C1.66064 6.1171 1.59869 5.73863 1.7417 5.41435V5.41337C1.88179 5.09688 2.19221 4.8924 2.53564 4.88212V4.88115L15.7271 3.45341L15.7397 3.45244H15.7534Z" fill="white" stroke="rgba(0,0,0,0.4)" strokeWidth="1" style={{paintOrder:'stroke fill'}}/>
     </svg>
   );
 }
@@ -1001,10 +1001,10 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
           boxSizing: 'border-box',
         } : {}),
         color: '#FFF',
-        WebkitTextStrokeWidth: (showAsUser || showPlusOne) ? '0' : '0.5px',
+        WebkitTextStrokeWidth: showAsUser ? '0' : '0.5px',
         WebkitTextStrokeColor: 'rgba(0,0,0,0.75)',
-        paintOrder: (showAsUser || showPlusOne) ? undefined : 'stroke fill',
-        textShadow: (showAsUser || showPlusOne) ? 'none' : undefined,
+        paintOrder: showAsUser ? undefined : 'stroke fill',
+        textShadow: showAsUser ? 'none' : undefined,
         fontFamily: '"PingFang SC", sans-serif',
         fontSize: 15,
         fontWeight: 500,
@@ -1082,6 +1082,17 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
   const lastFiredWidthRef = useRef(90); // measured width of last fired danmaku
   // fireRef holds the latest fire fn so setTimeout closure never goes stale
   const fireRef = useRef(null);
+  // plusOneSentRef 始终持有最新值，供延迟 setTimeout 闭包读取
+  const plusOneSentRef = useRef(plusOneSent);
+  useEffect(() => {
+    plusOneSentRef.current = plusOneSent;
+    // +1 被发送时：立即清空队列中所有对应的 preset +1 项，无需等 fire 时判断
+    if (plusOneSent && plusOneSent.size > 0) {
+      userQueue.current = userQueue.current.filter(
+        d => !(d.isPreset && d.isPlusOne && plusOneSent.has(d.text))
+      );
+    }
+  }, [plusOneSent]);
 
   useEffect(() => {
     let hasUserSend = false;
@@ -1090,11 +1101,16 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
         enqueuedIds.current.add(d.id);
         if (d.isPreset) {
           if (d.delay) {
-            // 到时直接插队并立即发射，不等下一个背景节奏
+            // 到时检查：若该 +1 已被用户发送则直接放弃，不入队
             setTimeout(() => {
+              if (d.isPlusOne && plusOneSentRef.current?.has(d.text)) return;
               userQueue.current.unshift(d);
+              const speed = 890 / ITEM_DURATION;
+              const elapsed = Date.now() - lastFireTimeRef.current;
+              const needed = (lastFiredWidthRef.current + MIN_GAP) / speed * 1000;
+              const waitMore = Math.max(50, needed - elapsed);
               clearTimeout(fireTimerRef.current);
-              fireTimerRef.current = setTimeout(() => fireRef.current?.(), 0);
+              fireTimerRef.current = setTimeout(() => fireRef.current?.(), waitMore);
             }, d.delay);
           } else {
             userQueue.current.push(d);
@@ -1124,15 +1140,21 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
     const now = Date.now();
     if (userQueue.current.length > 0) {
       const u = userQueue.current.shift();
+      // 已点击 +1 的 preset 弹幕，跳过不再发射
+      if (u.isPreset && u.isPlusOne && plusOneSent?.has(u.text)) {
+        scheduleNext(90);
+        return;
+      }
       entry = { key: `u-${u.id}`, text: u.text, isUser: !u.isPreset, origId: u.id, baseCount, isPlusOne: u.isPlusOne ?? false, featured: u.featured ?? false, replies: u.replies ?? 0, firedAt: now };
     } else {
       const pool = bgTexts ?? BG_TEXTS[rowIndex];
       // 过滤掉用户已通过 +1 发送过的文本，避免后续循环中重复出现
       const filteredPool = plusOneSent?.size > 0 ? pool.filter(t => !plusOneSent.has(t)) : pool;
-      const activePool = filteredPool.length > 0 ? filteredPool : pool;
-      const txt = activePool[bgIndex.current % activePool.length];
+      // pool 被完全过滤时停止该行发射
+      if (filteredPool.length === 0) return;
+      const txt = filteredPool[bgIndex.current % filteredPool.length];
       bgIndex.current++;
-      entry = { key: `bg-${rowIndex}-${now}`, text: txt, isUser: false, baseCount, isPlusOne: plusOneTextSet?.has(txt) ?? false, firedAt: now };
+      entry = { key: `bg-${rowIndex}-${now}`, text: txt, isUser: false, baseCount, isPlusOne: false, firedAt: now };
     }
     onRegister?.(entry.key, baseCount);
     lastFiredKeyRef.current = entry.key;
@@ -1142,12 +1164,12 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
     if (entry.isUser) onUserItemFired?.(entry.key, entry.text, rowIndex, now);
     setActive(prev => [...prev, entry]);
     // Schedule next fire using estimated width (will be corrected by onMeasure)
-    scheduleNext(estimateWidth(entry.text, entry.isUser));
+    scheduleNext(estimateWidth(entry.text, entry.isUser, entry.isPlusOne));
   };
 
-  function estimateWidth(text, isUser) {
-    // Chinese chars ≈ 15px each at fontSize:15 fontWeight:500; +16px for user pill padding
-    return text.length * 15 + (isUser ? 16 : 0);
+  function estimateWidth(text, isUser, isPlusOne) {
+    // Chinese chars ≈ 15px each at fontSize:15 fontWeight:500; +16px for user pill padding; +28px for +1 icon+gap+padding
+    return text.length * 15 + (isUser ? 16 : 0) + (isPlusOne && !isUser ? 28 : 0);
   }
 
   function scheduleNext(width) {
@@ -1207,7 +1229,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 // Danmaku overlay — 3 独立行轨道，统一调度背景 + 用户弹幕
 // panelOpen=true 时将容器切换为 pointer-events:auto 并 stopPropagation，
 // 防止弹幕区域内的空白点击冒泡到主容器导致面板意外关闭。
-function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false, onUserDanmakuAppear, disableCounter = false, dimmed = false }) {
+function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false, onUserDanmakuAppear, disableCounter = false, dimmed = false, disableMagnet = false }) {
   const [textCounts, setTextCounts] = useState({});
   const [magnetedKeys, setMagnetedKeys] = useState(new Set());
   const [ghosts, setGhosts] = useState([]);
@@ -1222,7 +1244,7 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
   function handleItemActive(key, text, row, firedAt) {
     activeItemsRef.current[key] = { text, row, firedAt };
     const userItem = activeUserItemsRef.current[text];
-    if (userItem && key !== userItem.key) {
+    if (!disableMagnet && userItem && key !== userItem.key) {
       // 同文本的新弹幕在用户弹幕出现后触发 → 磁吸
       doMagnetize(key, text, row, userItem);
     }
@@ -1824,6 +1846,7 @@ export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, u
           onUserDanmakuAppear={emojiFloat ? (text) => { if (text === '接接接') setEmojiFloatTrigger(v => v + 1); } : undefined}
           disableCounter={disableCounter}
           dimmed={danmakuDimmed}
+          disableMagnet={emojiFloat}
         />
       )}
 

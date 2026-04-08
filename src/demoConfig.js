@@ -33,7 +33,6 @@ const DEMOS = [
     annotations: [
       { text: '弹幕区域', side: 'right', yInPhone: 135 },
       { text: '发弹幕按钮', side: 'left', yInPhone: 647 },
-      { text: '打开声音，沉浸观看', side: 'right', yInPhone: 726 },
     ],
     danmakus: [
       { text: '这是一个弹幕', row: 0 },
@@ -67,10 +66,14 @@ const DEMOS = [
     label: '功能1 | 跟发弹幕',
     info: {
       tag: '功能 1',
-      title: '跟发弹幕',
-      description: '点击弹幕，tooltip 中新增 “跟发” 功能，聚合复制粘贴效果。\n点击功能后，弹幕文本被快速复制到弹幕面板输入框中，方便再编辑。',
+      title: '跟发弹幕，\n基于已有的优质表达快速二创',
+      description: '点击弹幕，tooltip 中新增 “跟发” 功能，聚合复制粘贴效果。\n点击后，弹幕文本快速复制到弹幕面板输入框中。',
     },
     disableCounter: true,
+    annotations: [
+      { text: '点击弹幕，再点击跟发', side: 'right', yInPhone: 135, icon: 'followsend' },
+      { text: '打开声音，沉浸观看', side: 'right', yInPhone: 726 },
+    ],
     video: 'usecase1.mov',
     avatar: 'usecase1.jpg',
     username: '@圆滚滚的瑞吉',
@@ -117,9 +120,12 @@ const DEMOS = [
     label: '功能2 | 弹幕+1发送',
     info: {
       tag: '功能 2',
-      title: '这是一个标题描述',
-      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是\n一个描述这是一个描述这是一个描述这是一个描述',
+      title: '高频弹幕+1，\n即时表达认同，营造在场感',
+      description: '+1 弹幕的样式与发送后样式类似，视觉隐喻吸引点击。\n点击后，原地展现为已发送样式。',
     },
+    annotations: [
+      { text: '捕捉 +1 弹幕并点击', side: 'right', yInPhone: 135 },
+    ],
     disableCounter: true,
     video: 'usecase2.mov',
     avatar: 'usecase2.jpg',
@@ -127,39 +133,29 @@ const DEMOS = [
     description: '你的男神已上线#刘耀文',
     captionOffset: 24,
     danmakus: [
+      // +1 弹幕每 8 秒出现一次
       { text: '男神你随便吧', row: 0, plusOne: true, delay: 2000 },
-      { text: '老公你随便吧', row: 0 },
+      { text: '男神你随便吧', row: 1, plusOne: true, delay: 10000 },
+      { text: '男神你随便吧', row: 2, plusOne: true, delay: 18000 },
+      { text: '男神你随便吧', row: 0, plusOne: true, delay: 26000 },
+      { text: '男神你随便吧', row: 1, plusOne: true, delay: 32000 },
+      { text: '男神你随便吧', row: 1, plusOne: true, delay: 40000 },
+      { text: '男神你随便吧', row: 1, plusOne: true, delay: 48000 },
+      { text: '男神你随便吧', row: 1, plusOne: true, delay: 56000 },
+      { text: '男神你随便吧', row: 1, plusOne: true, delay: 64000 },
+      { text: '男神你随便吧', row: 1, plusOne: true, delay: 72000 },
+      // 背景弹幕
       { text: '男神你随便吧', row: 0 },
       { text: '男神你随便吧', row: 0 },
       { text: '男神你随便吧', row: 0 },
-      { text: '男神你随便吧', row: 0 },
-      { text: '太帅了', row: 0 },
-      { text: '神了吧', row: 0 },
-      { text: '太帅了', row: 0 },
       { text: '男神你随便吧', row: 1 },
       { text: '男神你随便吧', row: 1 },
+      { text: '太帅了吧', row: 1 },
       { text: '男神你随便吧', row: 1 },
-      { text: '太帅了', row: 1 },
-      { text: '神了吧', row: 1 },
-      { text: '太帅了', row: 1 },
-      { text: '男神你随便吧', row: 1 },
-      { text: '男神你随便吧', row: 1 },
-      { text: '男神你随便吧', row: 1 },
-      { text: '老公你随便吧', row: 1 },
-      { text: '男神你随便吧', row: 1 },
-      { text: '男神你随便吧', row: 1 },
-      { text: '男神你随便吧', row: 1 },
-      { text: '男神你随便吧', row: 1 },
-      { text: '夯爆了', row: 2},
-      { text: '男神！', row: 2 },
       { text: '男神你随便吧', row: 2 },
       { text: '男神你随便吧', row: 2 },
       { text: '男神你随便吧', row: 2 },
-      { text: '男神你随便吧', row: 2 },
-      { text: '男神你随便吧', row: 2 },
-      { text: '男神你随便吧', row: 2 },
-      { text: '老公你随便吧', row: 2 },
-      { text: '男神你随便吧', row: 2 },
+      { text: '神图有了', row: 1 },
     ],
   },
   {
@@ -167,10 +163,13 @@ const DEMOS = [
     label: '功能3 | 评论精选弹幕',
     info: {
       tag: '功能 3',
-      title: '这是一个标题描述',
-      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是\n一个描述这是一个描述这是一个描述这是一个描述',
+      title: '评论精选弹幕，\n还原最熟悉的互动方式',
+      description: '精选弹幕外露回复按钮，可跳转至弹幕面板查看。\n弹幕回复后，回复内容同步发送至弹幕区，达成渗透。',
     },
     disableCounter: true,
+    annotations: [
+      { text: '查看精选弹幕回复', side: 'right', yInPhone: 135 },
+    ],
     video: 'usecase3.mov',
     avatar: 'usecase3.jpg',
     username: '@橘一橙 NiceFriend',
@@ -216,12 +215,15 @@ const DEMOS = [
 
     {
     slide: 5,
-    label: '功能4| 聚合相同弹幕',
+    label: '功能4 | 聚合相同弹幕',
     info: {
       tag: '功能 4',
-      title: '这是一个标题描述',
-      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是\n一个描述这是一个描述这是一个描述这是一个描述',
+      title: '聚合相同弹幕，\n用数据传递情绪共振',
+      description: '在开放式偏好表达的内容场景下，\n通过对相同弹幕聚合计数，让用户清晰感知同频观点的热度。',
     },
+    annotations: [
+      { text: '试玩从夯到拉，比如发送"拉完了"', side: 'left', yInPhone: 651 },
+    ],
     video: 'usecase4.mov',
     avatar: 'usecase4.png',
     username: '@尖端锐评玩家',
@@ -273,9 +275,12 @@ const DEMOS = [
     label: '功能5 |表情外延弹幕',
     info: {
       tag: '功能 5',
-      title: '这是一个标题描述',
-      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是\n一个描述这是一个描述这是一个描述这是一个描述',
+      title: '表情外延文字，\n放大集群式情绪',
+      description: '引入更直观、更具冲击力的表情元素，通过满屏飘起的视觉效果递进情绪，放大用户的认同、期望、肯定等主观感受。',
     },
+    annotations: [
+      { text: '试着发送"接接接"', side: 'left', yInPhone: 675 },
+    ],
     disableCounter: true,
     emojiFloat: true,
     video: 'usecase5-1.mov',
@@ -328,12 +333,15 @@ const DEMOS = [
     label: '功能6 | 热点弹幕玩法',
     info: {
       tag: '功能 6',
-      title: '这是一个标题描述',
-      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是\n一个描述这是一个描述这是一个描述这是一个描述',
+      title: '衔接当下热点，\n为弹幕发送注入丰富内涵',
+      description: '在节日、热点等强情绪节点，视频内容深度与表达意愿升级。\n对发送形态做差异化设计，提升弹幕发声的有用性。',
     },
     kiteDanmaku: true,
     disableCounter: true,
     willowLeaf: true,
+    annotations: [
+      { text: '试试发一条弹幕', side: 'left', yInPhone: 651 },
+    ],
     video: 'usecase6.mov',
     avatar: 'usecase6.jpg',
     username: '@子扬ZYang',
@@ -393,10 +401,13 @@ const DEMOS = [
 ];
 
 // 自动从 danmakus 按 row 分组，生成各页背景文案池
+// 只排除标记了 plusOne:true 的条目，文本相同但未标记的背景弹幕仍可进入池
 DEMOS.forEach(demo => {
   if (demo.danmakus && demo.danmakus.length > 0) {
     const pool = [[], [], []];
-    demo.danmakus.forEach(d => pool[d.row ?? 0].push(d.text));
+    demo.danmakus.forEach(d => {
+      if (!d.plusOne) pool[d.row ?? 0].push(d.text);
+    });
     // 去重，空行 fallback 用其他行
     demo.bgTexts = pool.map((arr, i) => {
       const unique = [...new Set(arr)];

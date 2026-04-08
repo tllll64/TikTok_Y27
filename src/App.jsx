@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import TikTokHome from './TikTokHome';
 import phoneBezel from './assets/figma/phone-bezel.png';
 import tiktokLogo from './assets/figma/tiktok-logo.png';
+import popoverFollowSendSvg from './assets/figma/popover-followsend.svg';
 import slide6TooltipImg from './assets/figma/6d097609b258bdc99e1d20a9c4a1650bd265a6d7.png';
 import slide6LineImg from './assets/figma/9bfd7f9a50fa089902aaea3ceeeb3b2cf615f0ac.svg';
 import DEMOS from './demoConfig';
@@ -156,7 +158,16 @@ function Slide6LeftPanel() {
 // side: 'left' | 'right'
 const ANNOTATION_GAP = 14; // px gap between bezel edge and arrow tip
 
-function DemoAnnotation({ text, side, yInPhone }) {
+const ANNOTATION_ICON_COMPONENTS = {
+  followsend: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, opacity: 0.65 }}>
+      <path d="M4.88381 7.86537C4.88381 10.3523 6.89424 12.3684 9.37423 12.3684C11.8542 12.3684 13.8646 10.3523 13.8646 7.86537C13.8646 5.37844 11.8542 3.36239 9.37423 3.36239C6.89424 3.36239 4.88381 5.37844 4.88381 7.86537Z" fill="white"/>
+      <path d="M20.0898 3.26702C19.1328 3.13341 18.2481 3.80117 18.1143 4.75823C17.7806 7.14403 17.1904 8.87853 16.3027 10.2992C15.7926 11.1157 15.1606 11.8658 14.3675 12.5955C14.096 12.8453 13.7453 12.9827 13.4043 13.1235C12.468 13.5098 11.3585 13.8553 10.1621 14.0053C9.17255 14.1293 8.2205 14.1791 7.37402 14.1869C5.43927 14.2048 3.59584 15.3412 2.98535 17.1772L2.02734 20.059C1.81227 20.7063 2.2944 21.3744 2.97656 21.3744H16.7393C17.3568 21.3742 17.8267 20.8196 17.7256 20.2104L17.4865 18.7712C17.1001 16.4453 18.0211 14.1532 19.2705 12.1537C20.4882 10.2047 21.2003 7.96505 21.581 5.2426C21.7148 4.28549 21.047 3.40085 20.0898 3.26702Z" fill="white"/>
+    </svg>
+  ),
+};
+
+function DemoAnnotation({ text, side, yInPhone, icon }) {
   const containerTop = CONTENT_Y * PHONE_SCALE + yInPhone * PHONE_SCALE;
   const bezelW = BEZEL_W * PHONE_SCALE;
 
@@ -165,8 +176,8 @@ function DemoAnnotation({ text, side, yInPhone }) {
     fontSize: 13,
     fontWeight: 400,
     color: 'rgba(255,255,255,0.65)',
-    whiteSpace: 'nowrap',
-    lineHeight: 'normal',
+    whiteSpace: 'pre',
+    lineHeight: 1.6,
   };
 
   const Arrow = ({ dir }) => (
@@ -177,6 +188,9 @@ function DemoAnnotation({ text, side, yInPhone }) {
       }
     </svg>
   );
+
+  const IconComp = icon && ANNOTATION_ICON_COMPONENTS[icon];
+  const IconEl = IconComp ? <IconComp /> : null;
 
   if (side === 'right') {
     return (
@@ -190,6 +204,7 @@ function DemoAnnotation({ text, side, yInPhone }) {
       }}>
         <Arrow dir="left" />
         <span style={labelStyle}>{text}</span>
+        {IconEl}
       </div>
     );
   }
@@ -203,6 +218,7 @@ function DemoAnnotation({ text, side, yInPhone }) {
       pointerEvents: 'none',
     }}>
       <span style={labelStyle}>{text}</span>
+      {IconEl}
       <Arrow dir="right" />
     </div>
   );
@@ -442,6 +458,16 @@ function PhoneContent({ current, demo, slides }) {
   );
 }
 
+// ── Slide transition variants ─────────────────────────────────────────────────
+const SLIDE_VARIANTS = {
+  enter: (dir) => ({ y: dir > 0 ? '100%' : '-100%' }),
+  center: { y: 0 },
+  exit:  (dir) => ({ y: dir > 0 ? '-100%' : '100%' }),
+};
+const SLIDE_TRANSITION = {
+  y: { type: 'tween', duration: 0.48, ease: [0.32, 0.72, 0, 1] },
+};
+
 export default function App() {
   // 放在组件内，确保 demoConfig.js 热更新后 label 能同步刷新
   const DEMO_MAP = Object.fromEntries(DEMOS.map(d => [d.slide, d]));
@@ -451,45 +477,110 @@ export default function App() {
   }));
 
   const [current, setCurrent] = useState(0);
-  const demo = DEMO_MAP[current];
+  const [direction, setDirection] = useState(1);
 
-  // Slides that use the full 1920×1080 layout with a left panel
+  // Refs for scroll handling (stable across renders)
+  const lockRef      = useRef(false);
+  const scrollAccRef = useRef(0);
+  const slidesRef    = useRef(SLIDES);
+  const currentRef   = useRef(current);
+  useEffect(() => { slidesRef.current = SLIDES; });
+  useEffect(() => { currentRef.current = current; }, [current]);
+
+  // Navigate via index offset (+1 next / -1 prev)
+  function navigateSlide(dir) {
+    const slides = slidesRef.current;
+    const idx    = slides.findIndex(s => s.id === currentRef.current);
+    const next   = idx + dir;
+    if (next < 0 || next >= slides.length) { scrollAccRef.current = 0; return; }
+    lockRef.current    = true;
+    scrollAccRef.current = 0;
+    setDirection(dir);
+    setCurrent(slides[next].id);
+    setTimeout(() => { lockRef.current = false; }, 600);
+  }
+
+  // Wheel / trackpad scroll listener
+  useEffect(() => {
+    const THRESHOLD = 50;
+    const onWheel = (e) => {
+      e.preventDefault();
+      if (lockRef.current) { scrollAccRef.current = 0; return; }
+      scrollAccRef.current += e.deltaY;
+      if (scrollAccRef.current >  THRESHOLD) navigateSlide( 1);
+      if (scrollAccRef.current < -THRESHOLD) navigateSlide(-1);
+    };
+    window.addEventListener('wheel', onWheel, { passive: false });
+    return () => window.removeEventListener('wheel', onWheel);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Nav dot click — set direction based on relative position
+  function handleSelect(id) {
+    const slides   = slidesRef.current;
+    const currIdx  = slides.findIndex(s => s.id === currentRef.current);
+    const nextIdx  = slides.findIndex(s => s.id === id);
+    const dir      = nextIdx > currIdx ? 1 : -1;
+    lockRef.current      = true;
+    scrollAccRef.current = 0;
+    setDirection(dir);
+    setCurrent(id);
+    setTimeout(() => { lockRef.current = false; }, 600);
+  }
+
+  const demo         = DEMO_MAP[current];
   const hasLeftPanel = demo?.leftPanel === true;
-
   const phoneContent = <PhoneContent current={current} demo={demo} slides={SLIDES} />;
 
   return (
     <>
-      {hasLeftPanel ? (
-        <FullSlide leftPanel={<Slide6LeftPanel />}>
-          <PhoneFrame>{phoneContent}</PhoneFrame>
-        </FullSlide>
-      ) : (
-        <div style={{
-          minHeight: '100vh', background: '#111',
-          display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-          paddingRight: `calc(33.33vw - ${Math.round(BEZEL_W * PHONE_SCALE / 2)}px)`,
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
-          {demo?.info && (
-            <SlideInfoPanel
-              tag={demo.info.tag}
-              title={demo.info.title}
-              description={demo.info.description}
-            />
-          )}
-          <div style={{ position: 'relative', width: BEZEL_W * PHONE_SCALE, height: BEZEL_H * PHONE_SCALE, flexShrink: 0, overflow: 'visible' }}>
-            <div style={{ transform: `scale(${PHONE_SCALE})`, transformOrigin: 'top left', width: BEZEL_W, height: BEZEL_H }}>
-              <PhoneFrame>{phoneContent}</PhoneFrame>
-            </div>
-            {demo?.annotations?.map((ann, i) => (
-              <DemoAnnotation key={i} text={ann.text} side={ann.side} yInPhone={ann.yInPhone} />
-            ))}
-          </div>
-        </div>
-      )}
-      <SlideNav current={current} onSelect={setCurrent} slides={SLIDES} />
+      {/* Fixed viewport clip so exiting slides don't cause scrollbars */}
+      <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', background: hasLeftPanel ? '#000' : '#111' }}>
+        <AnimatePresence initial={false} custom={direction}>
+          <motion.div
+            key={current}
+            custom={direction}
+            variants={SLIDE_VARIANTS}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={SLIDE_TRANSITION}
+            style={{ position: 'absolute', inset: 0, willChange: 'transform' }}
+          >
+            {hasLeftPanel ? (
+              <FullSlide leftPanel={<Slide6LeftPanel />}>
+                <PhoneFrame>{phoneContent}</PhoneFrame>
+              </FullSlide>
+            ) : (
+              <div style={{
+                width: '100vw', height: '100vh', background: '#111',
+                display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+                paddingRight: `calc(33.33vw - ${Math.round(BEZEL_W * PHONE_SCALE / 2)}px)`,
+                position: 'relative',
+                overflow: 'hidden',
+              }}>
+                {demo?.info && (
+                  <SlideInfoPanel
+                    tag={demo.info.tag}
+                    title={demo.info.title}
+                    description={demo.info.description}
+                  />
+                )}
+                <div style={{ position: 'relative', width: BEZEL_W * PHONE_SCALE, height: BEZEL_H * PHONE_SCALE, flexShrink: 0, overflow: 'visible' }}>
+                  <div style={{ transform: `scale(${PHONE_SCALE})`, transformOrigin: 'top left', width: BEZEL_W, height: BEZEL_H }}>
+                    <PhoneFrame>{phoneContent}</PhoneFrame>
+                  </div>
+                  {demo?.annotations?.map((ann, i) => (
+                    <DemoAnnotation key={i} text={ann.text} side={ann.side} yInPhone={ann.yInPhone} icon={ann.icon} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Nav dots — rendered above the animated layer */}
+      <SlideNav current={current} onSelect={handleSelect} slides={SLIDES} />
     </>
   );
 }
