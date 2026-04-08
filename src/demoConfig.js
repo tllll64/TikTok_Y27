@@ -26,10 +26,15 @@ const DEMOS = [
     username: '@圆滚滚的瑞吉',
     description: '太多粉丝喜欢我们瑞吉了真棒～#瑞吉#奇妙的动物#动物的迷惑行为',
     info: {
-      tag: '功能概览',
-      title: '这是一个标题描述',
-      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是\n一个描述这是一个描述这是一个描述这是一个描述',
+      tag: '请在右侧试玩',
+      title: '弹幕玩法说明',
+      description: '1. 点击某条弹幕，点赞、跟发或回复这条弹幕\n2. 点击发弹幕按钮，用键盘打出弹幕内容，点击发送',
     },
+    annotations: [
+      { text: '弹幕区域', side: 'right', yInPhone: 135 },
+      { text: '发弹幕按钮', side: 'left', yInPhone: 647 },
+      { text: '打开声音，沉浸观看', side: 'right', yInPhone: 726 },
+    ],
     danmakus: [
       { text: '这是一个弹幕', row: 0 },
       { text: '这是一个弹幕', row: 0 },
@@ -59,11 +64,11 @@ const DEMOS = [
   },
   {
     slide: 2,
-    label: '功能1 | 弹幕跟发',
+    label: '功能1 | 跟发弹幕',
     info: {
       tag: '功能 1',
-      title: '这是一个标题描述',
-      description: '这是一个描述这是一个描述这是一个描述这是一个描述这是\n一个描述这是一个描述这是一个描述这是一个描述',
+      title: '跟发弹幕',
+      description: '点击弹幕，tooltip 中新增 “跟发” 功能，聚合复制粘贴效果。\n点击功能后，弹幕文本被快速复制到弹幕面板输入框中，方便再编辑。',
     },
     disableCounter: true,
     video: 'usecase1.mov',

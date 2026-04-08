@@ -1003,6 +1003,7 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
         color: '#FFF',
         WebkitTextStrokeWidth: (showAsUser || showPlusOne) ? '0' : '0.5px',
         WebkitTextStrokeColor: 'rgba(0,0,0,0.75)',
+        paintOrder: (showAsUser || showPlusOne) ? undefined : 'stroke fill',
         textShadow: (showAsUser || showPlusOne) ? 'none' : undefined,
         fontFamily: '"PingFang SC", sans-serif',
         fontSize: 15,

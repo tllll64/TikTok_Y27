@@ -151,6 +151,63 @@ function Slide6LeftPanel() {
   );
 }
 
+// ── Demo annotations (arrows + labels outside the phone bezel) ───────────────
+// yInPhone: y coordinate in the 390×844 phone screen space
+// side: 'left' | 'right'
+const ANNOTATION_GAP = 14; // px gap between bezel edge and arrow tip
+
+function DemoAnnotation({ text, side, yInPhone }) {
+  const containerTop = CONTENT_Y * PHONE_SCALE + yInPhone * PHONE_SCALE;
+  const bezelW = BEZEL_W * PHONE_SCALE;
+
+  const labelStyle = {
+    fontFamily: '"PingFang SC", sans-serif',
+    fontSize: 13,
+    fontWeight: 400,
+    color: 'rgba(255,255,255,0.65)',
+    whiteSpace: 'nowrap',
+    lineHeight: 'normal',
+  };
+
+  const Arrow = ({ dir }) => (
+    <svg width="7" height="11" viewBox="0 0 7 11" fill="none" style={{ flexShrink: 0 }}>
+      {dir === 'left'
+        ? <path d="M6 1L1 5.5L6 10" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        : <path d="M1 1L6 5.5L1 10" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      }
+    </svg>
+  );
+
+  if (side === 'right') {
+    return (
+      <div style={{
+        position: 'absolute',
+        left: bezelW + ANNOTATION_GAP,
+        top: containerTop,
+        transform: 'translateY(-50%)',
+        display: 'flex', alignItems: 'center', gap: 6,
+        pointerEvents: 'none',
+      }}>
+        <Arrow dir="left" />
+        <span style={labelStyle}>{text}</span>
+      </div>
+    );
+  }
+  return (
+    <div style={{
+      position: 'absolute',
+      right: bezelW + ANNOTATION_GAP,
+      top: containerTop,
+      transform: 'translateY(-50%)',
+      display: 'flex', alignItems: 'center', gap: 6,
+      pointerEvents: 'none',
+    }}>
+      <span style={labelStyle}>{text}</span>
+      <Arrow dir="right" />
+    </div>
+  );
+}
+
 // ── Slide left info panel ─────────────────────────────────────────────────────
 function SlideInfoPanel({ tag, title, description }) {
   return (
@@ -422,10 +479,13 @@ export default function App() {
               description={demo.info.description}
             />
           )}
-          <div style={{ width: BEZEL_W * PHONE_SCALE, height: BEZEL_H * PHONE_SCALE, flexShrink: 0 }}>
+          <div style={{ position: 'relative', width: BEZEL_W * PHONE_SCALE, height: BEZEL_H * PHONE_SCALE, flexShrink: 0, overflow: 'visible' }}>
             <div style={{ transform: `scale(${PHONE_SCALE})`, transformOrigin: 'top left', width: BEZEL_W, height: BEZEL_H }}>
               <PhoneFrame>{phoneContent}</PhoneFrame>
             </div>
+            {demo?.annotations?.map((ann, i) => (
+              <DemoAnnotation key={i} text={ann.text} side={ann.side} yInPhone={ann.yInPhone} />
+            ))}
           </div>
         </div>
       )}
