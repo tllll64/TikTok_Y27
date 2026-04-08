@@ -18,7 +18,7 @@
 const DEMOS = [
   {
     slide: 0,
-    label: '弹幕优化展示',
+    label: '弹幕玩法说明',
     bgColor: '#2a2a2a',
     centerLogo: true,
     disableCounter: true,
@@ -26,7 +26,7 @@ const DEMOS = [
     username: '@圆滚滚的瑞吉',
     description: '太多粉丝喜欢我们瑞吉了真棒～#瑞吉#奇妙的动物#动物的迷惑行为',
     info: {
-      tag: '请在右侧试玩',
+      tag: '💡 请在右侧试玩',
       title: '弹幕玩法说明',
       description: '1. 点击某条弹幕，点赞、跟发或回复这条弹幕\n2. 点击发弹幕按钮，用键盘打出弹幕内容，点击发送',
     },
@@ -74,7 +74,7 @@ const DEMOS = [
       { text: '点击弹幕，再点击跟发', side: 'right', yInPhone: 135, icon: 'followsend' },
       { text: '打开声音，沉浸观看', side: 'right', yInPhone: 726 },
     ],
-    video: 'usecase1.mov',
+    video: 'https://g7wxjm6ewnwsi0wp.public.blob.vercel-storage.com/videos/usecase1.mov',
     avatar: 'usecase1.jpg',
     username: '@圆滚滚的瑞吉',
     description: '太多粉丝喜欢我们瑞吉了真棒～#瑞吉#奇妙的动物#动物的迷惑行为',
@@ -127,7 +127,7 @@ const DEMOS = [
       { text: '捕捉 +1 弹幕并点击', side: 'right', yInPhone: 135 },
     ],
     disableCounter: true,
-    video: 'usecase2.mov',
+    video: 'https://g7wxjm6ewnwsi0wp.public.blob.vercel-storage.com/videos/usecase2.mov',
     avatar: 'usecase2.jpg',
     username: '@高冷兄弟',
     description: '你的男神已上线#刘耀文',
@@ -170,7 +170,7 @@ const DEMOS = [
     annotations: [
       { text: '查看精选弹幕回复', side: 'right', yInPhone: 135 },
     ],
-    video: 'usecase3.mov',
+    video: 'https://g7wxjm6ewnwsi0wp.public.blob.vercel-storage.com/videos/usecase3.mov',
     avatar: 'usecase3.jpg',
     username: '@橘一橙 NiceFriend',
     description: '如何安稳度过二十几岁焦虑的”Odyssey时期”？很长的talking环节',
@@ -224,7 +224,7 @@ const DEMOS = [
     annotations: [
       { text: '试玩从夯到拉，比如发送"拉完了"', side: 'left', yInPhone: 651 },
     ],
-    video: 'usecase4.mov',
+    video: 'https://g7wxjm6ewnwsi0wp.public.blob.vercel-storage.com/videos/usecase4.mov',
     avatar: 'usecase4.png',
     username: '@尖端锐评玩家',
     description: '从夯到拉 锐评一下奶茶店#从夯到拉排名#内容过于真实#夯爆了',
@@ -283,7 +283,7 @@ const DEMOS = [
     ],
     disableCounter: true,
     emojiFloat: true,
-    video: 'usecase5-1.mov',
+    video: 'https://g7wxjm6ewnwsi0wp.public.blob.vercel-storage.com/videos/usecase5-1.mov',
     avatar: 'usecase5-1.jpg',
     username: '@小笼包（见过两次版）',
     description: '所有人Lets接接接#演唱会抢票',
@@ -342,7 +342,7 @@ const DEMOS = [
     annotations: [
       { text: '试试发一条弹幕', side: 'left', yInPhone: 651 },
     ],
-    video: 'usecase6.mov',
+    video: 'https://g7wxjm6ewnwsi0wp.public.blob.vercel-storage.com/videos/usecase6.mov',
     avatar: 'usecase6.jpg',
     username: '@子扬ZYang',
     description: '又是清明雨上，不觉绿满江南 地点：杭州·茅家埠 2026.4.3',

@@ -28,6 +28,11 @@ import _imgCd from './assets/figma/bc85e29da692f889aa9ead5ad86cb64adc4573fe.png'
 import _imgMusicAlbum from './assets/figma/c35a05ad50aa8c32ed23b992168090216097175c.png';
 import _imgAvatar from './assets/figma/9f8f7487fce5713e6ac8ed9965f49fdef41eeb9a.png';
 import _imgAvatar1 from './assets/figma/943217ce82bc4d9ae1c32be0b8c38a641789b913.png';
+import _imgReplyDidi from './assets/figma/reply-avatar-didi.png';
+import _imgReplyXinyifan from './assets/figma/reply-avatar-xinyifan.png';
+import _imgReplyXiaoshi from './assets/figma/reply-avatar-xiaoshi.png';
+import _imgReplyPapi from './assets/figma/reply-avatar-papi.png';
+import _imgReplyXiaoxi from './assets/figma/reply-avatar-xiaoxi.png';
 import _imgSearch from './assets/figma/053df630afa80cf14d5f67f1bf24eb0e7b8ace79.svg';
 import _imgMusic from './assets/figma/1cacb78552ad185b8eaa0f495dbaa923f41526a8.svg';
 import _imgComment from './assets/figma/a2f984a7878475b42f21e52d86a00b8e65ec3e09.svg';
@@ -82,6 +87,11 @@ const imgCd = _imgCd;
 const imgMusicAlbum = _imgMusicAlbum;
 const imgAvatar = _imgAvatar;
 const imgAvatar1 = _imgAvatar1;
+const imgReplyDidi = _imgReplyDidi;
+const imgReplyXinyifan = _imgReplyXinyifan;
+const imgReplyXiaoshi = _imgReplyXiaoshi;
+const imgReplyPapi = _imgReplyPapi;
+const imgReplyXiaoxi = _imgReplyXiaoxi;
 const imgSearch = _imgSearch;
 const imgMusic = _imgMusic;
 const imgComment = _imgComment;
@@ -962,7 +972,7 @@ function CounterBadge({ count }) {
 }
 
 // 单条弹幕 — isPlusOne: 可+1弹幕; hasSentPlusOne: 已点击+1; isFeatured: 精选弹幕样式
-function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey, likeCount, baseCount, isFeatured, replies, matchCount = 0, onItemClick, onEnd, onMeasure }) {
+function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey, likeCount, baseCount, isFeatured, replies, matchCount = 0, onItemClick, onEnd, onMeasure, onRepliesClick }) {
   const isLiked = likeCount > 0;
   // 精选弹幕不参与 popup/pause 系统
   const isActive = !isFeatured && (activeKey === myKey);
@@ -1038,23 +1048,28 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
       {isUser && matchCount > 0 && <CounterBadge count={matchCount} />}
       {showPlusOne && <PlusOneIcon />}
       {isFeatured && replies > 0 && (
-        <span style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 2,
-          height: 22,
-          padding: '0 7px',
-          borderRadius: 14,
-          border: '0.5px solid rgba(255,255,255,0.15)',
-          background: 'rgba(255,255,255,0.1)',
-          flexShrink: 0,
-          fontFamily: '"PingFang SC", sans-serif',
-          fontWeight: 400,
-          fontSize: 12,
-          color: '#FFF',
-          WebkitTextStrokeWidth: '0',
-          lineHeight: 'normal',
-        }}>
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 2,
+            height: 22,
+            padding: '0 7px',
+            borderRadius: 14,
+            border: '0.5px solid rgba(255,255,255,0.15)',
+            background: 'rgba(255,255,255,0.1)',
+            flexShrink: 0,
+            fontFamily: '"PingFang SC", sans-serif',
+            fontWeight: 400,
+            fontSize: 12,
+            color: '#FFF',
+            WebkitTextStrokeWidth: '0',
+            lineHeight: 'normal',
+            pointerEvents: 'auto',
+            cursor: 'pointer',
+          }}
+          onClick={e => { e.stopPropagation(); onRepliesClick?.(text, replies); }}
+        >
           {replies}条回复
           <svg width="4" height="7" viewBox="0 0 4 7" fill="none" style={{ flexShrink: 0 }}>
             <path d="M1 1L3 3.5L1 6" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1071,7 +1086,7 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
 }
 
 // 单行弹幕轨道
-function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts, plusOneSent, plusOneTextSet, onTextAppear, onTextLeave, textCounts, syncRows, onItemActive, onItemInactive, onUserItemFired, magnetedKeys }) {
+function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts, plusOneSent, plusOneTextSet, onTextAppear, onTextLeave, textCounts, syncRows, onItemActive, onItemInactive, onUserItemFired, magnetedKeys, onRepliesClick }) {
   const [active, setActive] = useState([]);
   const bgIndex = useRef(0);
   const userQueue = useRef([]);
@@ -1220,6 +1235,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
           onItemClick={(e, key, text, ip) => onItemClick(e, key, rowIndex, text, ip)}
           onEnd={() => remove(item.key, item.origId, item.text)}
           onMeasure={w => handleMeasure(item.key, w)}
+          onRepliesClick={onRepliesClick}
         />
       ))}
     </div>
@@ -1229,7 +1245,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 // Danmaku overlay — 3 独立行轨道，统一调度背景 + 用户弹幕
 // panelOpen=true 时将容器切换为 pointer-events:auto 并 stopPropagation，
 // 防止弹幕区域内的空白点击冒泡到主容器导致面板意外关闭。
-function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false, onUserDanmakuAppear, disableCounter = false, dimmed = false, disableMagnet = false }) {
+function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false, onUserDanmakuAppear, disableCounter = false, dimmed = false, disableMagnet = false, onRepliesClick }) {
   const [textCounts, setTextCounts] = useState({});
   const [magnetedKeys, setMagnetedKeys] = useState(new Set());
   const [ghosts, setGhosts] = useState([]);
@@ -1321,6 +1337,7 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
             onItemInactive={handleItemInactive}
             onUserItemFired={handleUserItemFired}
             magnetedKeys={magnetedKeys}
+            onRepliesClick={onRepliesClick}
           />
         ))}
       </div>
@@ -1616,6 +1633,251 @@ function KiteDanmakuEffect({ triggerText }) {
   );
 }
 
+// --- 弹幕回复面板 — Figma 148:5422 "评论 - 7分屏浮层面板" ---
+function ReplyPanel({ danmakuText, repliesCount, onClose }) {
+  const KF = { fontFamily: '"PingFang SC", sans-serif' };
+  const [highlighted, setHighlighted] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setHighlighted(false), 1500);
+    return () => clearTimeout(t);
+  }, []);
+
+  // 根据精选弹幕内容生成样本回复 (Figma 中的三条评论)
+  const sampleReplies = [
+    { id: 1, avatar: imgReplyDidi,  username: 'Didi哒哒',   text: danmakuText,                          time: '昨天 14:36', location: '上海', likes: 284, highlighted: true },
+    { id: 2, avatar: imgReplyPapi,  username: '帕皮帕皮',   text: '不管怎么选择都在失去另外一种人生',   time: '昨天 12:20', location: '北京', likes: 47  },
+    { id: 3, avatar: imgReplyXiaoxi, username: '小希在日本', text: '过了二十五岁找工作更难了',           time: '昨天 12:20', location: '日本', likes: 6   },
+  ];
+
+  return (
+    <motion.div
+      style={{
+        position: 'absolute',
+        left: 0, bottom: 0,
+        width: 390, height: 617,
+        background: '#fefdfd',
+        borderRadius: '12px 12px 0 0',
+        zIndex: 60,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        boxShadow: '0px -4px 24px rgba(0,0,0,0.18)',
+      }}
+      initial={{ y: 617 }}
+      animate={{ y: 0 }}
+      exit={{ y: 617 }}
+      transition={{ type: 'tween', ease: [0.25, 0.46, 0.45, 0.94], duration: 0.32 }}
+      onClick={e => e.stopPropagation()}
+    >
+      {/* Jump-link header bar — Figma 148:5602 "🚫跳链" — 390×52px */}
+      <div style={{
+        height: 52, flexShrink: 0,
+        position: 'relative',
+        display: 'flex', alignItems: 'center',
+        overflow: 'hidden',
+      }}>
+        {/* Left text: "观看完整集合：" + blue link */}
+        <div style={{
+          position: 'absolute', left: 11,
+          display: 'flex', alignItems: 'center',
+          overflow: 'hidden', whiteSpace: 'nowrap',
+          maxWidth: 265,
+        }}>
+          <span style={{ ...KF, fontSize: 15, fontWeight: 400, color: 'rgba(22,24,35,0.75)', flexShrink: 0 }}>
+            观看完整集合：
+          </span>
+          <span style={{
+            fontFamily: '"PingFang HK", "PingFang SC", sans-serif',
+            fontSize: 15, fontWeight: 400,
+            color: '#04498d',
+            overflow: 'hidden', textOverflow: 'ellipsis',
+          }}>
+            weekly taling
+          </span>
+        </div>
+
+        {/* Right: white fade layer */}
+        <div style={{
+          position: 'absolute', right: 0, top: 0,
+          width: 100, height: 52,
+          background: 'linear-gradient(to right, transparent, rgba(254,253,253,0.95) 36%)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Right: icon buttons (zoom-out + close), above the fade */}
+        <div style={{
+          position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+          display: 'flex', alignItems: 'center', gap: 20,
+        }}>
+          {/* Close X icon — 24×24, bg #F3F3F4 */}
+          <div
+            style={{ position: 'relative', width: 24, height: 24, flexShrink: 0, cursor: 'pointer' }}
+            onClick={onClose}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" style={{ display: 'block' }}>
+              <circle cx="12" cy="12" r="12" fill="#F3F3F4"/>
+            </svg>
+            <svg style={{ position: 'absolute', top: 6, left: 6, width: 12, height: 12 }} viewBox="0 0 8.6 8.6" fill="none">
+              <path d="M1 1L7.6 7.6M7.6 1L1 7.6" stroke="#161823" strokeWidth="1.2" strokeLinecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab bar — 评论 | 弹幕(selected) */}
+      <div style={{
+        height: 40, flexShrink: 0,
+        display: 'flex', alignItems: 'flex-end',
+        paddingLeft: 12, gap: 24,
+        borderBottom: '0.5px solid rgba(22,24,35,0.12)',
+      }}>
+        <div style={{ paddingBottom: 10, cursor: 'pointer' }}>
+          <span style={{ ...KF, fontSize: 14, fontWeight: 400, color: 'rgba(22,24,35,0.6)' }}>评论 2045</span>
+        </div>
+        <div style={{ paddingBottom: 8, borderBottom: '2px solid #161823', cursor: 'pointer' }}>
+          <span style={{ ...KF, fontSize: 14, fontWeight: 500, color: '#161823' }}>弹幕 {repliesCount}</span>
+        </div>
+      </div>
+
+      {/* Reply list (scrollable) */}
+      <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain' }}>
+        {sampleReplies.map(reply => (
+          <div key={reply.id}>
+            {/* 一级评论行 */}
+            <div
+              style={{
+                padding: '11px 16px',
+                display: 'flex', gap: 12,
+                background: (reply.highlighted && highlighted) ? 'rgba(22,24,35,0.04)' : 'transparent',
+                transition: 'background 0.3s ease',
+              }}
+            >
+              <img
+                src={reply.avatar} alt=""
+                style={{ width: 36, height: 36, borderRadius: 18, objectFit: 'cover', flexShrink: 0 }}
+              />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ ...KF, fontSize: 13, fontWeight: 400, color: 'rgba(22,24,35,0.34)', margin: '0 0 4px 0' }}>
+                  {reply.username}
+                </p>
+                <p style={{ ...KF, fontSize: 15, fontWeight: 400, color: '#161823', lineHeight: 1.5, margin: '0 0 8px 0' }}>
+                  {reply.text}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <span style={{ ...KF, fontSize: 13, color: 'rgba(22,24,35,0.34)' }}>
+                      {reply.time}·{reply.location}
+                    </span>
+                    <span style={{ ...KF, fontSize: 13, fontWeight: 500, color: 'rgba(22,24,35,0.6)', cursor: 'pointer' }}>
+                      回复
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="14" viewBox="0 0 15 14" fill="none">
+                        <path d="M0 4.95627C0 2.06666 2.04116 0 4.59861 0C5.82638 0 6.8056 0.518707 7.50001 1.31286C8.1968 0.520574 9.17102 0 10.4014 0C12.9588 0 15 2.06666 15 4.95627C15 6.56653 14.323 8.11879 13.2123 9.54898C12.1024 10.9781 10.5335 12.3206 8.672 13.5322C8.51617 13.637 8.33807 13.7448 8.15801 13.8291C7.9936 13.9061 7.75289 14 7.49651 14C7.23863 14 6.99876 13.9051 6.83554 13.8277C6.65733 13.7432 6.48149 13.6355 6.32798 13.5322C4.4665 12.3205 2.89759 10.9781 1.78772 9.54898C0.677004 8.11879 0 6.56653 0 4.95627ZM4.59861 1.34699C2.85462 1.34699 1.34848 2.74003 1.34848 4.95627C1.34848 6.17794 1.86205 7.44714 2.85318 8.72333C3.84426 9.99947 5.28684 11.2473 7.06844 12.4064L7.07773 12.4125C7.20242 12.4965 7.31803 12.5654 7.4138 12.6108C7.44914 12.6276 7.47689 12.6388 7.49731 12.646C7.51892 12.6386 7.54833 12.6269 7.58567 12.6094C7.68309 12.5638 7.79997 12.495 7.92232 12.4125L7.93151 12.4064C9.71311 11.2472 11.1557 9.99947 12.1468 8.72333C13.1379 7.44714 13.6515 6.17794 13.6515 4.95627C13.6515 2.74003 12.1454 1.34699 10.4014 1.34699C9.35465 1.34699 8.58197 1.90681 8.08929 2.81492L7.48935 3.92075L6.90053 2.80897C6.42379 1.90879 5.64764 1.34699 4.59861 1.34699Z" fill="#161823" fillOpacity="0.6"/>
+                      </svg>
+                      <span style={{ ...KF, fontSize: 13, color: 'rgba(22,24,35,0.6)' }}>{reply.likes}</span>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="14" viewBox="0 0 15 14" fill="none">
+                      <path fillRule="evenodd" clipRule="evenodd" d="M4.59861 0C2.04116 0 0 2.06666 0 4.95627C0 6.56653 0.677004 8.11879 1.78772 9.54898C2.89759 10.9781 4.4665 12.3205 6.32798 13.5322C6.48149 13.6355 6.65733 13.7432 6.83554 13.8277C6.99876 13.9051 7.23863 14 7.49651 14C7.75289 14 7.9936 13.9061 8.15801 13.8291C8.33807 13.7448 8.51617 13.637 8.672 13.5322C10.5335 12.3206 12.1024 10.9781 13.2123 9.54898C14.323 8.11879 15 6.56653 15 4.95627C15 2.06666 12.9588 0 10.4014 0C9.17102 0 8.1968 0.520574 7.50001 1.31286C6.8056 0.518707 5.82638 0 4.59861 0ZM1.34848 4.95627C1.34848 2.74003 2.85462 1.34699 4.59861 1.34699C5.55181 1.34699 6.27971 1.81084 6.7624 2.57091L5.83334 5.37283C5.70028 5.77411 5.78198 6.21549 6.04988 6.54272L7.92705 8.83563L6.9144 12.3054C5.2036 11.1749 3.81554 9.96249 2.85318 8.72333C1.86205 7.44714 1.34848 6.17794 1.34848 4.95627ZM8.37587 12.1106C9.95372 11.0361 11.2395 9.89162 12.1468 8.72333C13.1379 7.44714 13.6515 6.17794 13.6515 4.95627C13.6515 2.74003 12.1454 1.34699 10.4014 1.34699C9.37684 1.34699 8.61487 1.88331 8.12101 2.75762L7.13285 5.73777L9.00836 8.02865C9.26622 8.34362 9.35219 8.76526 9.23819 9.15588L8.37587 12.1106Z" fill="#161823" fillOpacity="0.6"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 二级评论 + 展开按钮 — 仅在第一条评论下方展示 */}
+            {reply.id === 1 && (
+              <div>
+                {[
+                  { id: 'sub1', avatar: imgReplyXinyifan, username: '新一番天地',   text: '有道理',                   time: '昨天', location: '美国' },
+                  { id: 'sub2', avatar: imgReplyXiaoshi,  username: '小狮子会尖叫', text: '确实缺少了自我认同的勇气', time: '昨天', location: '杭州' },
+                ].map(sub => (
+                  <div key={sub.id} style={{ display: 'flex', alignItems: 'flex-start', padding: '8px 16px 8px 60px', gap: 8 }}>
+                    <img src={sub.avatar} alt="" style={{ width: 20, height: 20, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ ...KF, fontSize: 13, fontWeight: 400, color: 'rgba(22,24,35,0.34)', margin: '0 0 3px 0' }}>
+                        {sub.username}
+                      </p>
+                      <p style={{ ...KF, fontSize: 15, fontWeight: 400, color: '#161823', lineHeight: 1.4, margin: '0 0 6px 0' }}>
+                        {sub.text}
+                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                          <span style={{ ...KF, fontSize: 13, color: 'rgba(22,24,35,0.34)' }}>
+                            {sub.time}·{sub.location}
+                          </span>
+                          <span style={{ ...KF, fontSize: 13, fontWeight: 500, color: 'rgba(22,24,35,0.6)', cursor: 'pointer' }}>
+                            回复
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="14" viewBox="0 0 15 14" fill="none">
+                            <path d="M0 4.95627C0 2.06666 2.04116 0 4.59861 0C5.82638 0 6.8056 0.518707 7.50001 1.31286C8.1968 0.520574 9.17102 0 10.4014 0C12.9588 0 15 2.06666 15 4.95627C15 6.56653 14.323 8.11879 13.2123 9.54898C12.1024 10.9781 10.5335 12.3206 8.672 13.5322C8.51617 13.637 8.33807 13.7448 8.15801 13.8291C7.9936 13.9061 7.75289 14 7.49651 14C7.23863 14 6.99876 13.9051 6.83554 13.8277C6.65733 13.7432 6.48149 13.6355 6.32798 13.5322C4.4665 12.3205 2.89759 10.9781 1.78772 9.54898C0.677004 8.11879 0 6.56653 0 4.95627ZM4.59861 1.34699C2.85462 1.34699 1.34848 2.74003 1.34848 4.95627C1.34848 6.17794 1.86205 7.44714 2.85318 8.72333C3.84426 9.99947 5.28684 11.2473 7.06844 12.4064L7.07773 12.4125C7.20242 12.4965 7.31803 12.5654 7.4138 12.6108C7.44914 12.6276 7.47689 12.6388 7.49731 12.646C7.51892 12.6386 7.54833 12.6269 7.58567 12.6094C7.68309 12.5638 7.79997 12.495 7.92232 12.4125L7.93151 12.4064C9.71311 11.2472 11.1557 9.99947 12.1468 8.72333C13.1379 7.44714 13.6515 6.17794 13.6515 4.95627C13.6515 2.74003 12.1454 1.34699 10.4014 1.34699C9.35465 1.34699 8.58197 1.90681 8.08929 2.81492L7.48935 3.92075L6.90053 2.80897C6.42379 1.90879 5.64764 1.34699 4.59861 1.34699Z" fill="#161823" fillOpacity="0.6"/>
+                          </svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="14" viewBox="0 0 15 14" fill="none">
+                            <path fillRule="evenodd" clipRule="evenodd" d="M4.59861 0C2.04116 0 0 2.06666 0 4.95627C0 6.56653 0.677004 8.11879 1.78772 9.54898C2.89759 10.9781 4.4665 12.3205 6.32798 13.5322C6.48149 13.6355 6.65733 13.7432 6.83554 13.8277C6.99876 13.9051 7.23863 14 7.49651 14C7.75289 14 7.9936 13.9061 8.15801 13.8291C8.33807 13.7448 8.51617 13.637 8.672 13.5322C10.5335 12.3206 12.1024 10.9781 13.2123 9.54898C14.323 8.11879 15 6.56653 15 4.95627C15 2.06666 12.9588 0 10.4014 0C9.17102 0 8.1968 0.520574 7.50001 1.31286C6.8056 0.518707 5.82638 0 4.59861 0ZM1.34848 4.95627C1.34848 2.74003 2.85462 1.34699 4.59861 1.34699C5.55181 1.34699 6.27971 1.81084 6.7624 2.57091L5.83334 5.37283C5.70028 5.77411 5.78198 6.21549 6.04988 6.54272L7.92705 8.83563L6.9144 12.3054C5.2036 11.1749 3.81554 9.96249 2.85318 8.72333C1.86205 7.44714 1.34848 6.17794 1.34848 4.95627ZM8.37587 12.1106C9.95372 11.0361 11.2395 9.89162 12.1468 8.72333C13.1379 7.44714 13.6515 6.17794 13.6515 4.95627C13.6515 2.74003 12.1454 1.34699 10.4014 1.34699C9.37684 1.34699 8.61487 1.88331 8.12101 2.75762L7.13285 5.73777L9.00836 8.02865C9.26622 8.34362 9.35219 8.76526 9.23819 9.15588L8.37587 12.1106Z" fill="#161823" fillOpacity="0.6"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* 展开 N 条回复 — Figma 148:5544 */}
+                <div style={{ height: 30, display: 'flex', alignItems: 'center', marginBottom: 4, cursor: 'pointer' }}>
+                  <div style={{ width: 20, height: 1, background: 'rgba(22,24,35,0.12)', marginLeft: 60, flexShrink: 0 }} />
+                  <div style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ ...KF, fontSize: 13, fontWeight: 500, color: 'rgba(22,24,35,0.6)' }}>
+                      展开 {repliesCount} 条回复
+                    </span>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M2.5 4.5L6 8L9.5 4.5" stroke="rgba(22,24,35,0.6)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Input bar — 56px (Figma 148:5589) */}
+      <div style={{
+        height: 56, flexShrink: 0,
+        borderTop: '0.5px solid rgba(22,24,35,0.12)',
+        background: '#fff',
+        display: 'flex', alignItems: 'center',
+        padding: '0 12px',
+      }}>
+        <div style={{
+          flex: 1, height: 40,
+          background: 'rgba(22,24,35,0.05)',
+          borderRadius: 22,
+          display: 'flex', alignItems: 'center',
+          paddingLeft: 12, paddingRight: 12, gap: 8,
+        }}>
+          <span style={{ ...KF, fontSize: 15, fontWeight: 400, color: 'rgba(22,24,35,0.6)', flex: 1 }}>
+            回复弹幕，立即发送弹幕
+          </span>
+          <img src={imgEmojiIcon} alt="" style={{ width: 24, height: 24, opacity: 0.5, flexShrink: 0 }} />
+        </div>
+      </div>
+
+      {/* Home indicator — 34px */}
+      <div style={{
+        height: 34, flexShrink: 0,
+        background: '#fff',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <div style={{ width: 134, height: 5, background: 'rgba(0,0,0,0.22)', borderRadius: 100 }} />
+      </div>
+    </motion.div>
+  );
+}
+
 // --- Main Page Component ---
 export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0, syncRows = false, emojiFloat = false, kiteDanmaku = false, disableCounter = false, willowLeaf = false }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
@@ -1635,6 +1897,8 @@ export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, u
   const [showKitePrompt, setShowKitePrompt] = useState(false);
   const [hasSentKite, setHasSentKite] = useState(false);
   const [danmakuDimmed, setDanmakuDimmed] = useState(false);
+  const [replyPanelOpen, setReplyPanelOpen] = useState(false);
+  const [replyPanelData, setReplyPanelData] = useState(null); // { text, replies }
 
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -1642,10 +1906,10 @@ export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, u
   const sentToastTimerRef = useRef(null);
   const itemBaseCountRef = useRef({}); // { [key]: baseCount } registered when each item fires
 
-  // 进入功能6页面2.5秒后，弹幕按钮变为纸鸢提示形态
+  // 进入功能6页面1.5秒后，弹幕按钮变为纸鸢提示形态
   useEffect(() => {
     if (!kiteDanmaku) return;
-    const timer = setTimeout(() => setShowKitePrompt(true), 2000);
+    const timer = setTimeout(() => setShowKitePrompt(true), 1500);
     return () => clearTimeout(timer);
   }, [kiteDanmaku]);
 
@@ -1720,6 +1984,11 @@ export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, u
     setDanmakuOpen(true);
   }
 
+  function handleRepliesClick(text, replies) {
+    setReplyPanelData({ text, replies });
+    setReplyPanelOpen(true);
+  }
+
   return (
     <div
       ref={containerRef}
@@ -1727,10 +1996,9 @@ export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, u
       style={{ width: 390, height: 844 }}
       data-name="首页 - 简洁"
       onClick={() => {
-        // 点击弹幕区域外的视频区域：关闭面板 + 关闭弹出菜单
-        // 弹幕区域内的点击已被 DanmakuOverlay 容器的 stopPropagation 拦截，不会到达这里
         if (danmakuOpen) setDanmakuOpen(false);
         if (danmakuPopup) dismissPopup();
+        if (replyPanelOpen) setReplyPanelOpen(false);
       }}
     >
       {/* Background */}
@@ -1847,6 +2115,7 @@ export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, u
           disableCounter={disableCounter}
           dimmed={danmakuDimmed}
           disableMagnet={emojiFloat}
+          onRepliesClick={handleRepliesClick}
         />
       )}
 
@@ -1933,6 +2202,17 @@ export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, u
             onToggleDanmaku={() => setDanmakuOn(v => !v)}
             text={panelText}
             onTextChange={setPanelText}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* 弹幕回复面板 — slides up when featured danmaku replies are tapped */}
+      <AnimatePresence>
+        {replyPanelOpen && replyPanelData && (
+          <ReplyPanel
+            danmakuText={replyPanelData.text}
+            repliesCount={replyPanelData.replies}
+            onClose={() => setReplyPanelOpen(false)}
           />
         )}
       </AnimatePresence>

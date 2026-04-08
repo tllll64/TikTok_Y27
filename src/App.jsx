@@ -14,6 +14,8 @@ const VIDEO_ASSETS = import.meta.glob('./assets/video/*', { eager: true });
 const AVATAR_ASSETS = import.meta.glob('./assets/avatar/*', { eager: true });
 
 function videoAsset(filename) {
+  if (!filename) return null;
+  if (filename.startsWith('http')) return filename;
   const mod = VIDEO_ASSETS[`./assets/video/${filename}`]
     ?? FIGMA_ASSETS[`./assets/figma/${filename}`];
   return mod ? mod.default : null;
@@ -254,7 +256,7 @@ function SlideInfoPanel({ tag, title, description }) {
         display: 'inline-flex',
         alignItems: 'center',
         padding: '5px 14px',
-        border: '1.5px solid rgba(255,255,255,0.75)',
+        border: '1.5px solid rgba(255,255,255,0.4)',
         borderRadius: 20,
         width: 'fit-content',
       }}>
@@ -331,6 +333,7 @@ function FullSlide({ leftPanel, children }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       gap: PANEL_PHONE_GAP,
       overflow: 'hidden',
+      position: 'relative',
     }}>
       {/* Left panel — clipped to LEFT_PANEL_CLIP so the pair centres correctly */}
       <div style={{
@@ -351,6 +354,7 @@ function FullSlide({ leftPanel, children }) {
           {children}
         </div>
       </div>
+
     </div>
   );
 }
