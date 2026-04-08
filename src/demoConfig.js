@@ -18,7 +18,7 @@
 const DEMOS = [
   {
     slide: 6,
-    label: 'O1 | 弹幕跟发',
+    label: '功能1 | 弹幕跟发',
     leftPanel: true,
     video: 'usecase1.mov',
     avatar: 'usecase1.jpg',
@@ -63,7 +63,7 @@ const DEMOS = [
   },
   {
     slide: 7,
-    label: 'O1 | 弹幕+1发送',
+    label: '功能2 | 弹幕+1发送',
     video: 'usecase2.mov',
     avatar: 'usecase2.jpg',
     username: '@高冷兄弟',
@@ -107,7 +107,7 @@ const DEMOS = [
   },
   {
     slide: 8,
-    label: 'O1 | 评论精选弹幕',
+    label: '功能3 | 评论精选弹幕',
     video: 'usecase3.mov',
     avatar: 'usecase3.jpg',
     username: '@橘一橙 NiceFriend',
@@ -151,9 +151,9 @@ const DEMOS = [
     ],
   },
 
-  {
+    {
     slide: 9,
-    label: 'O2 | 评论精选弹幕',
+    label: '功能4| 聚合相同弹幕',
     video: 'usecase4.mov',
     avatar: 'usecase4.png',
     username: '@尖端锐评玩家',
@@ -200,9 +200,9 @@ const DEMOS = [
   },
 
 
-  {
+    {
     slide: 10,
-    label: 'O2 | xxx',
+    label: '功能5 |表情外延弹幕',
     emojiFloat: true,
     video: 'usecase5-1.mov',
     avatar: 'usecase5-1.jpg',
@@ -249,15 +249,13 @@ const DEMOS = [
     ],
   },
 
-  {
+    {
     slide: 11,
-    label: 'O2 | xxx',
+    label: '功能6 | 热点弹幕玩法',
     kiteDanmaku: true,
-    disableCounter: true,
-    willowLeaf: true,
     video: 'usecase6.mov',
     avatar: 'usecase6.jpg',
-    username: '子扬ZYang',
+    username: '@子扬ZYang',
     description: '又是清明雨上，不觉绿满江南 地点：杭州·茅家埠 2026.4.3',
     captionOffset: 0,
     danmakus: [
@@ -327,8 +325,3 @@ DEMOS.forEach(demo => {
 });
 
 export default DEMOS;
-
-// 数据文件不支持 HMR 局部热替换，变更时强制整页刷新以确保 label 等数据同步
-if (import.meta.hot) {
-  import.meta.hot.decline();
-}
