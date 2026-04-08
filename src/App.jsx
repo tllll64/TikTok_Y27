@@ -485,7 +485,7 @@ function FigmaSlide() {
     }}>
       {/* 80% scaled container */}
       <div style={{
-        width: '80vw', height: '80vh',
+        width: '64vw', height: '80vh',
         display: 'flex', flexDirection: 'column', alignItems: 'center',
       }}>
         {/* Title */}
@@ -509,12 +509,6 @@ function FigmaSlide() {
               fontFamily: '"PingFang SC", sans-serif',
               fontSize: 13, fontWeight: 400, color: '#fff',
             }}>设计说明文档</span>
-          </div>
-          <div style={{
-            fontFamily: '"PingFang SC", sans-serif',
-            fontSize: 28, fontWeight: 600, color: '#fff',
-          }}>
-            Y27 · 抖音弹幕优化
           </div>
         </motion.div>
 
