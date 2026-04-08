@@ -432,11 +432,73 @@ function Caption({ username = "@听一", description = "简单可能比复杂更
 }
 
 // Danmaku input button (bottom left)
-function DanmakuButton({ onClick, topOffset = 0 }) {
+function DanmakuButton({ onClick, topOffset = 0, showKitePrompt = false, hidden = false }) {
+  if (showKitePrompt) {
+    return (
+      <div
+        className="absolute cursor-pointer"
+        style={{ top: 626 + topOffset, left: 0, display: 'flex', alignItems: 'center', visibility: hidden ? 'hidden' : 'visible' }}
+        onClick={onClick}
+      >
+        {/* Kite bird — 原地渐入 */}
+        <motion.div
+          style={{ position: 'relative', zIndex: 2, marginRight: -30, flexShrink: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+        >
+          <img
+            src={_imgKiteBird}
+            alt="kite"
+            style={{
+              width: 52,
+              height: 42,
+              transform: 'rotate(-7.61deg)',
+              filter: 'drop-shadow(0px 1.8px 12.9px rgba(7,7,7,0.68))',
+              display: 'block',
+            }}
+          />
+        </motion.div>
+        {/* Pill-shaped background + text — 从左至右滑入 */}
+        <motion.div
+          initial={{ opacity: 0, x: -24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.45, ease: 'easeOut', delay: 0.05 }}
+          style={{
+          position: 'relative',
+          height: 24,
+          minWidth: 150,
+          display: 'flex',
+          alignItems: 'center',
+          paddingLeft: 32,
+          paddingRight: 18,
+          borderRadius: 12,
+          background: 'linear-gradient(90deg, #010101 0%, #74816C 5%, #E5FFD5 15%, #EDFFE3 42%, #DFE9C4 71%, #010101 96%)',
+          zIndex: 1,
+        }}>
+          <span style={{
+            fontFamily: '"PingFang SC", sans-serif',
+            fontSize: 11,
+            fontWeight: 500,
+            color: '#294034',
+            whiteSpace: 'nowrap',
+            lineHeight: '15px',
+          }}>
+            写下春天的期许
+          </span>
+          {/* Pencil icon */}
+          <svg style={{ marginLeft: 3, flexShrink: 0 }} width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6.5 0.5L8.5 2.5L2.5 8.5L0.5 9L1 7L6.5 0.5Z" fill="#294034"/>
+          </svg>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="absolute flex items-center left-[12px] p-[6px] rounded-[16px] cursor-pointer"
-      style={{ top: 635 + topOffset, background: "rgba(77,77,77,0.5)" }}
+      style={{ top: 635 + topOffset, background: "rgba(77,77,77,0.5)", visibility: hidden ? 'hidden' : 'visible' }}
       onClick={onClick}
     >
       <DanmakuIcon className="relative shrink-0 w-[20px] h-[20px]" />
@@ -1144,7 +1206,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 // Danmaku overlay — 3 独立行轨道，统一调度背景 + 用户弹幕
 // panelOpen=true 时将容器切换为 pointer-events:auto 并 stopPropagation，
 // 防止弹幕区域内的空白点击冒泡到主容器导致面板意外关闭。
-function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false, onUserDanmakuAppear, disableCounter = false }) {
+function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false, onUserDanmakuAppear, disableCounter = false, dimmed = false }) {
   const [textCounts, setTextCounts] = useState({});
   const [magnetedKeys, setMagnetedKeys] = useState(new Set());
   const [ghosts, setGhosts] = useState([]);
@@ -1209,7 +1271,9 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
       <div
         className="absolute"
         style={{ top: 0, left: 0, width: 390, height: 200, zIndex: 10,
-                 pointerEvents: panelOpen ? 'auto' : 'none' }}
+                 pointerEvents: panelOpen ? 'auto' : 'none',
+                 opacity: dimmed ? 0.4 : 1,
+                 transition: 'opacity 0.5s ease' }}
         onClick={panelOpen ? e => e.stopPropagation() : undefined}
       >
         {[0, 1, 2].map(ri => (
@@ -1545,12 +1609,22 @@ export default function TikTokHome({ className, videoSrc, username, description,
   const [emojiFloatTrigger, setEmojiFloatTrigger] = useState(0);
   const [kiteDanmakuText, setKiteDanmakuText] = useState(null);
   const [willowLeafTrigger, setWillowLeafTrigger] = useState(0);
+  const [showKitePrompt, setShowKitePrompt] = useState(false);
+  const [hasSentKite, setHasSentKite] = useState(false);
+  const [danmakuDimmed, setDanmakuDimmed] = useState(false);
 
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const popupTimerRef = useRef(null);
   const sentToastTimerRef = useRef(null);
   const itemBaseCountRef = useRef({}); // { [key]: baseCount } registered when each item fires
+
+  // 进入功能6页面2.5秒后，弹幕按钮变为纸鸢提示形态
+  useEffect(() => {
+    if (!kiteDanmaku) return;
+    const timer = setTimeout(() => setShowKitePrompt(true), 2000);
+    return () => clearTimeout(timer);
+  }, [kiteDanmaku]);
 
   function handleSend(text) {
     if (!text.trim()) return;
@@ -1561,9 +1635,12 @@ export default function TikTokHome({ className, videoSrc, username, description,
     if (kiteDanmaku) {
       // 等风筝完全消失后（6.5s）再让普通弹幕飘入
       setKiteDanmakuText({ text: text.trim(), id: Date.now() });
+      setHasSentKite(true);
+      setDanmakuDimmed(true);
       if (willowLeaf) setWillowLeafTrigger(prev => prev + 1);
       setTimeout(() => {
         setUserDanmakus(prev => [...prev, { id, text, row }]);
+        setDanmakuDimmed(false);
       }, 6500);
     } else {
       setUserDanmakus(prev => [...prev, { id, text, row }]);
@@ -1722,6 +1799,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
           syncRows={syncRows}
           onUserDanmakuAppear={emojiFloat ? (text) => { if (text === '接接接') setEmojiFloatTrigger(v => v + 1); } : undefined}
           disableCounter={disableCounter}
+          dimmed={danmakuDimmed}
         />
       )}
 
@@ -1794,7 +1872,7 @@ export default function TikTokHome({ className, videoSrc, username, description,
       <Caption username={username} description={description} topOffset={captionOffset} />
 
       {/* Danmaku input button */}
-      <DanmakuButton onClick={e => { e.stopPropagation(); setDanmakuOpen(true); }} topOffset={captionOffset} />
+      <DanmakuButton onClick={e => { e.stopPropagation(); setDanmakuOpen(true); }} topOffset={captionOffset} showKitePrompt={kiteDanmaku && showKitePrompt && !hasSentKite} hidden={danmakuOpen} />
 
       {/* Bottom navigation — hidden when panel open */}
       {!danmakuOpen && <BottomNav />}

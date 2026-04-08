@@ -20,6 +20,7 @@ const DEMOS = [
     slide: 2,
     label: '功能1 | 弹幕跟发',
     leftPanel: true,
+    disableCounter: true,
     video: 'usecase1.mov',
     avatar: 'usecase1.jpg',
     username: '@圆滚滚的瑞吉',
@@ -64,6 +65,7 @@ const DEMOS = [
   {
     slide: 3,
     label: '功能2 | 弹幕+1发送',
+    disableCounter: true,
     video: 'usecase2.mov',
     avatar: 'usecase2.jpg',
     username: '@高冷兄弟',
@@ -108,6 +110,7 @@ const DEMOS = [
   {
     slide: 4,
     label: '功能3 | 评论精选弹幕',
+    disableCounter: true,
     video: 'usecase3.mov',
     avatar: 'usecase3.jpg',
     username: '@橘一橙 NiceFriend',
@@ -203,6 +206,7 @@ const DEMOS = [
     {
     slide: 6,
     label: '功能5 |表情外延弹幕',
+    disableCounter: true,
     emojiFloat: true,
     video: 'usecase5-1.mov',
     avatar: 'usecase5-1.jpg',
