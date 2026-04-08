@@ -477,6 +477,8 @@ const FIGMA_EMBED_URL = 'https://www.figma.com/embed?embed_host=share&url=' +
   encodeURIComponent('https://www.figma.com/proto/H9iUsuS0iyuVoEVjVb2KIU/Y27-TikTok?node-id=1-2952&p=f&viewport=161%2C200%2C0.38&t=bxPDvzOrgbWUIJWV-1&scaling=scale-down&content-scaling=fixed&page-id=0%3A1');
 
 function FigmaSlide() {
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+
   return (
     <div style={{
       width: '100vw', height: '100vh', background: '#111',
@@ -493,16 +495,35 @@ function FigmaSlide() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
-          style={{ flex: 1, width: '100%', minHeight: 0 }}
+          style={{ flex: 1, width: '100%', minHeight: 0, position: 'relative' }}
         >
           <iframe
             src={FIGMA_EMBED_URL}
+            onLoad={() => setIframeLoaded(true)}
             style={{
               width: '100%', height: '100%',
               border: 'none', borderRadius: 12,
             }}
             allowFullScreen
           />
+          {/* Loading overlay — covers iframe until it loads */}
+          <motion.div
+            initial={{ opacity: 1 }}
+            animate={{ opacity: iframeLoaded ? 0 : 1 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            style={{
+              position: 'absolute', inset: 0,
+              background: '#111', borderRadius: 12,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              pointerEvents: iframeLoaded ? 'none' : 'auto',
+            }}
+          >
+            <span style={{
+              fontFamily: '"PingFang SC", sans-serif',
+              fontSize: 14, fontWeight: 400,
+              color: 'rgba(255,255,255,0.35)',
+            }}>等待内容加载</span>
+          </motion.div>
         </motion.div>
 
         {/* Tag */}
