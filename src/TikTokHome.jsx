@@ -782,8 +782,12 @@ const BG_TEXTS = [
   ['辅助黄刀兰陵王极其残忍', '兰陵王辅助很强的', '这波操作666', '太强了吧，求带'],
 ];
 const ROW_TOPS = [110, 135, 160];
-const ITEM_DURATION = 13.34;  // 每条弹幕滚动秒数（原10.67s × 1/0.8）
-const MIN_GAP = 48;           // 相邻弹幕最小间距 px
+const ITEM_DURATION = 13.34;    // 每条弹幕滚动秒数（原10.67s × 1/0.8）
+const FEATURED_DURATION = ITEM_DURATION + 4; // 13.34 + 4s pause = 17.34s
+// 精选弹幕到达左侧边缘时的进度百分比（相同速度 + 4s 静止插入）
+// P1 = (390/890 * 13.34) / 17.34 * 100 ≈ 33.71%
+// P2 = P1 + (4/17.34)*100          ≈ 56.77%
+const MIN_GAP = 48;             // 相邻弹幕最小间距 px
 
 // 弹幕点击后的弹出菜单
 const HEART_PATH = "M11.9949 21.5575C12.3018 21.5575 12.7621 21.312 13.1714 21.0358C18.5115 17.5575 22 13.4348 22 9.28133C22 5.53708 19.4015 3 16.2506 3C14.4229 3 13.0558 3.93892 12.1823 5.34696C12.0981 5.48267 11.8935 5.48167 11.8103 5.34534C10.952 3.9382 9.57636 3 7.74936 3C4.59847 3 2 5.53708 2 9.28133C2 13.4348 5.48849 17.5575 10.8286 21.0358C11.2379 21.312 11.688 21.5575 11.9949 21.5575Z";
@@ -972,15 +976,27 @@ function CounterBadge({ count }) {
 }
 
 // 单条弹幕 — isPlusOne: 可+1弹幕; hasSentPlusOne: 已点击+1; isFeatured: 精选弹幕样式
-function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey, likeCount, baseCount, isFeatured, replies, matchCount = 0, onItemClick, onEnd, onMeasure, onRepliesClick }) {
+function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey, likeCount, baseCount, isFeatured, replies, matchCount = 0, rowParked = false, isHidden = false, onItemClick, onEnd, onMeasure, onRepliesClick, onFeaturedPark, onFeaturedLeave, onFeaturedMeasure }) {
   const isLiked = likeCount > 0;
   // 精选弹幕不参与 popup/pause 系统
   const isActive = !isFeatured && (activeKey === myKey);
   const dimmed = !isFeatured && (!!activeKey && !isActive);
   const spanRef = useRef(null);
   useEffect(() => {
-    if (spanRef.current) onMeasure?.(spanRef.current.offsetWidth);
+    if (spanRef.current) {
+      onMeasure?.(spanRef.current.offsetWidth);
+      if (isFeatured) onFeaturedMeasure?.(spanRef.current.offsetWidth);
+    }
   }, []);
+
+  // 精选弹幕到达左侧边缘时通知行轨道，4s 后恢复
+  useEffect(() => {
+    if (!isFeatured) return;
+    const phase1Ms = Math.round(390 * ITEM_DURATION / 890 * 1000); // ≈ 5845ms
+    const parkTimer  = setTimeout(() => onFeaturedPark?.(),  phase1Ms);
+    const leaveTimer = setTimeout(() => onFeaturedLeave?.(), phase1Ms + 4000);
+    return () => { clearTimeout(parkTimer); clearTimeout(leaveTimer); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const showAsUser = isUser || (isPlusOne && hasSentPlusOne);
   const showPlusOne = isPlusOne && !hasSentPlusOne;
@@ -1022,21 +1038,26 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
         lineHeight: 'normal',
         whiteSpace: 'nowrap',
         willChange: 'transform',
-        animation: `danmaku-item ${ITEM_DURATION}s linear forwards`,
+        animation: isFeatured
+          ? `danmaku-featured ${FEATURED_DURATION}s linear forwards`
+          : `danmaku-item ${ITEM_DURATION}s linear forwards`,
         animationPlayState: isActive ? 'paused' : 'running',
-        opacity: dimmed ? 0.25 : 1,
-        transition: 'opacity 0.2s, border-color 0.2s',
-        pointerEvents: isFeatured ? 'none' : 'auto',
+        opacity: isHidden ? 0 : (dimmed ? 0.25 : (rowParked && !isFeatured ? 0.3 : 1)),
+        transition: isHidden ? 'none' : 'opacity 0.3s ease',
+        pointerEvents: (isHidden || isFeatured) ? 'none' : 'auto',
         cursor: isFeatured ? 'default' : 'pointer',
       }}
       onClick={isFeatured ? undefined : (e => { e.stopPropagation(); onItemClick(e, myKey, text, isPlusOne); })}
-      onAnimationEnd={e => { if (e.animationName === 'danmaku-item') onEnd(); }}
+      onAnimationEnd={e => {
+        const name = isFeatured ? 'danmaku-featured' : 'danmaku-item';
+        if (e.animationName === name) onEnd();
+      }}
     >
       {isFeatured && (
         <span style={{
           display: 'inline-flex', alignItems: 'center', flexShrink: 0,
           height: 20, padding: '0 4px', borderRadius: 4, overflow: 'hidden',
-          backgroundImage: 'linear-gradient(127.148deg, rgba(254,44,85,0.7) 11.878%, rgba(129,17,39,0.7) 100%), linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.06) 100%)',
+          background: 'linear-gradient(115deg, rgba(254,44,85,0.00) 11.63%, #D00029 100%), #FE2C55',
         }}>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="11" viewBox="0 0 24 11" fill="none">
             <path d="M15.252 2.112L12.648 1.296V0.0239997L15.252 0.84V2.112ZM21.012 5.268V7.176C21.012 7.296 21.06 7.368 21.156 7.392C21.372 7.416 21.58 7.416 21.78 7.392C21.884 7.368 21.936 7.296 21.936 7.176V5.904L23.232 6.072V7.62C23.192 8.212 22.92 8.56 22.416 8.664C21.768 8.768 21.144 8.776 20.544 8.688C19.936 8.568 19.62 8.212 19.596 7.62V5.268H18.66C18.548 6.092 18.276 6.8 17.844 7.392C17.42 7.984 16.788 8.528 15.948 9.024L15.444 7.608C16.484 7 17.088 6.22 17.256 5.268H15.456L15.336 4.092H18.66V2.52H17.232C17.16 2.792 17.044 3.16 16.884 3.624H15.48C15.864 2.616 16.16 1.5 16.368 0.276H17.748C17.684 0.644 17.612 1.008 17.532 1.368H18.66V0H20.076V1.368H22.596V2.52H20.076V4.092H23.016V5.268H21.012ZM14.88 7.284C14.944 8.044 15.196 8.588 15.636 8.916C16.012 9.196 16.556 9.336 17.268 9.336H23.22L22.908 10.596H17.244C15.748 10.596 14.768 10.088 14.304 9.072C14.08 9.696 13.48 10.292 12.504 10.86L12.096 9.648C12.52 9.392 12.86 9.056 13.116 8.64C13.372 8.216 13.504 7.784 13.512 7.344V4.416C13.504 4.288 13.436 4.22 13.308 4.212H12.42L12.3 3.012H13.932C14.564 3.012 14.88 3.324 14.88 3.948V7.284Z" fill="white"/>
@@ -1057,7 +1078,7 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
             padding: '0 7px',
             borderRadius: 14,
             border: '0.5px solid rgba(255,255,255,0.15)',
-            background: 'rgba(255,255,255,0.1)',
+            background: 'rgba(0,0,0,0.1)',
             flexShrink: 0,
             fontFamily: '"PingFang SC", sans-serif',
             fontWeight: 400,
@@ -1088,6 +1109,46 @@ function DanmakuItem({ text, isUser, isPlusOne, hasSentPlusOne, myKey, activeKey
 // 单行弹幕轨道
 function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onItemClick, likeMap, onRegister, bgTexts, plusOneSent, plusOneTextSet, onTextAppear, onTextLeave, textCounts, syncRows, onItemActive, onItemInactive, onUserItemFired, magnetedKeys, onRepliesClick }) {
   const [active, setActive] = useState([]);
+  const [featuredParked, setFeaturedParked] = useState(false);
+  const [hiddenKeys, setHiddenKeys] = useState(() => new Set());
+  const featuredWidthRef = useRef(0);
+  const activeRef = useRef(active);
+  useEffect(() => { activeRef.current = active; }, [active]);
+
+  // 精选弹幕静置期间：每 50ms 检测哪些弹幕与精选区域重叠并隐藏
+  // 静置结束时：对当前仍在重合区域的弹幕做快照，保持隐藏直至它们自然退出屏幕
+  // （精选与其他弹幕速度相同，相对位置不变，一旦重合将持续至退出）
+  useEffect(() => {
+    if (!featuredParked) {
+      // 4s 结束：计算此刻仍在重合区域的弹幕，持续隐藏
+      const W = featuredWidthRef.current;
+      const now = Date.now();
+      const snapshot = new Set();
+      activeRef.current.forEach(item => {
+        if (item.featured) return;
+        const currentX = 390 - (now - item.firedAt) / (ITEM_DURATION * 1000) * 890;
+        if (currentX < W) snapshot.add(item.key);
+      });
+      setHiddenKeys(snapshot.size > 0 ? snapshot : new Set());
+      return; // 不再需要 interval，这些项目退出屏幕后由 remove() 自动清理
+    }
+    const W = featuredWidthRef.current;
+    const id = setInterval(() => {
+      const now = Date.now();
+      const newHidden = new Set();
+      activeRef.current.forEach(item => {
+        if (item.featured) return;
+        const currentX = 390 - (now - item.firedAt) / (ITEM_DURATION * 1000) * 890;
+        if (currentX < W) newHidden.add(item.key);
+      });
+      setHiddenKeys(prev => {
+        if (prev.size !== newHidden.size) return newHidden;
+        for (const k of newHidden) if (!prev.has(k)) return newHidden;
+        return prev;
+      });
+    }, 50);
+    return () => clearInterval(id);
+  }, [featuredParked]);
   const bgIndex = useRef(0);
   const userQueue = useRef([]);
   const enqueuedIds = useRef(new Set());
@@ -1211,6 +1272,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 
   function remove(key, origId, text) {
     setActive(prev => prev.filter(i => i.key !== key));
+    setHiddenKeys(prev => { if (!prev.has(key)) return prev; const n = new Set(prev); n.delete(key); return n; });
     if (text) onTextLeave?.(text);
     onItemInactive?.(key);
     if (origId) onUserEnd(origId);
@@ -1232,6 +1294,11 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
           isFeatured={item.featured}
           replies={item.replies}
           matchCount={textCounts?.[item.text] ?? 0}
+          rowParked={!item.featured && featuredParked}
+          isHidden={!item.featured && hiddenKeys.has(item.key)}
+          onFeaturedPark={item.featured ? () => setFeaturedParked(true) : undefined}
+          onFeaturedLeave={item.featured ? () => setFeaturedParked(false) : undefined}
+          onFeaturedMeasure={item.featured ? w => { featuredWidthRef.current = w; } : undefined}
           onItemClick={(e, key, text, ip) => onItemClick(e, key, rowIndex, text, ip)}
           onEnd={() => remove(item.key, item.origId, item.text)}
           onMeasure={w => handleMeasure(item.key, w)}
@@ -1245,7 +1312,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
 // Danmaku overlay — 3 独立行轨道，统一调度背景 + 用户弹幕
 // panelOpen=true 时将容器切换为 pointer-events:auto 并 stopPropagation，
 // 防止弹幕区域内的空白点击冒泡到主容器导致面板意外关闭。
-function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false, onUserDanmakuAppear, disableCounter = false, dimmed = false, disableMagnet = false, onRepliesClick }) {
+function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, likeMap, onRegister, bgTexts, panelOpen = false, plusOneSent, plusOneTextSet, syncRows = false, onUserDanmakuAppear, disableCounter = false, dimmed = false, hidden = false, disableMagnet = false, onRepliesClick }) {
   const [textCounts, setTextCounts] = useState({});
   const [magnetedKeys, setMagnetedKeys] = useState(new Set());
   const [ghosts, setGhosts] = useState([]);
@@ -1298,9 +1365,16 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
   return (
     <>
       <style>{`
+        .reply-list::-webkit-scrollbar { display: none; }
         @keyframes danmaku-item {
           from { transform: translateX(390px); }
           to   { transform: translateX(-500px); }
+        }
+        @keyframes danmaku-featured {
+          0%     { transform: translateX(390px); }
+          33.71% { transform: translateX(0px); }
+          56.77% { transform: translateX(0px); }
+          100%   { transform: translateX(-500px); }
         }
         @keyframes count-roll {
           from { transform: translateY(-60%); opacity: 0; }
@@ -1311,8 +1385,8 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
         className="absolute"
         style={{ top: 0, left: 0, width: 390, height: 200, zIndex: 10,
                  pointerEvents: panelOpen ? 'auto' : 'none',
-                 opacity: dimmed ? 0.4 : 1,
-                 transition: 'opacity 0.5s ease' }}
+                 opacity: hidden ? 0 : (dimmed ? 0.4 : 1),
+                 transition: 'opacity 0.3s ease' }}
         onClick={panelOpen ? e => e.stopPropagation() : undefined}
       >
         {[0, 1, 2].map(ri => (
@@ -1741,7 +1815,7 @@ function ReplyPanel({ danmakuText, repliesCount, onClose }) {
       </div>
 
       {/* Reply list (scrollable) */}
-      <div style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain' }}>
+      <div className="reply-list" style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', scrollbarWidth: 'none' }}>
         {sampleReplies.map(reply => (
           <div key={reply.id}>
             {/* 一级评论行 */}
@@ -2114,6 +2188,7 @@ export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, u
           onUserDanmakuAppear={emojiFloat ? (text) => { if (text === '接接接') setEmojiFloatTrigger(v => v + 1); } : undefined}
           disableCounter={disableCounter}
           dimmed={danmakuDimmed}
+          hidden={replyPanelOpen}
           disableMagnet={emojiFloat}
           onRepliesClick={handleRepliesClick}
         />
