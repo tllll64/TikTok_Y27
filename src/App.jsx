@@ -488,15 +488,32 @@ function FigmaSlide() {
         width: '64vw', height: '80vh',
         display: 'flex', flexDirection: 'column', alignItems: 'center',
       }}>
-        {/* Title */}
+        {/* Figma iframe */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
+          style={{ flex: 1, width: '100%', minHeight: 0 }}
+        >
+          <iframe
+            src={FIGMA_EMBED_URL}
+            style={{
+              width: '100%', height: '100%',
+              border: 'none', borderRadius: 12,
+            }}
+            allowFullScreen
+          />
+        </motion.div>
+
+        {/* Tag */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.32, ease: 'easeOut' }}
           style={{
             flexShrink: 0,
-            paddingBottom: 20,
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+            paddingTop: 20,
+            display: 'flex', alignItems: 'center', gap: 10,
           }}
         >
           <div style={{
@@ -510,23 +527,6 @@ function FigmaSlide() {
               fontSize: 13, fontWeight: 400, color: '#fff',
             }}>设计说明文档</span>
           </div>
-        </motion.div>
-
-        {/* Figma iframe */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.32, ease: 'easeOut' }}
-          style={{ flex: 1, width: '100%', minHeight: 0 }}
-        >
-          <iframe
-            src={FIGMA_EMBED_URL}
-            style={{
-              width: '100%', height: '100%',
-              border: 'none', borderRadius: 12,
-            }}
-            allowFullScreen
-          />
         </motion.div>
       </div>
     </div>
