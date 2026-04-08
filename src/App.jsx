@@ -192,9 +192,15 @@ function DemoAnnotation({ text, side, yInPhone, icon }) {
   const IconComp = icon && ANNOTATION_ICON_COMPONENTS[icon];
   const IconEl = IconComp ? <IconComp /> : null;
 
+  const fadeIn = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: { duration: 0.5, delay: 0.28, ease: 'easeOut' },
+  };
+
   if (side === 'right') {
     return (
-      <div style={{
+      <motion.div {...fadeIn} style={{
         position: 'absolute',
         left: bezelW + ANNOTATION_GAP,
         top: containerTop,
@@ -205,11 +211,11 @@ function DemoAnnotation({ text, side, yInPhone, icon }) {
         <Arrow dir="left" />
         <span style={labelStyle}>{text}</span>
         {IconEl}
-      </div>
+      </motion.div>
     );
   }
   return (
-    <div style={{
+    <motion.div {...fadeIn} style={{
       position: 'absolute',
       right: bezelW + ANNOTATION_GAP,
       top: containerTop,
@@ -220,25 +226,29 @@ function DemoAnnotation({ text, side, yInPhone, icon }) {
       <span style={labelStyle}>{text}</span>
       {IconEl}
       <Arrow dir="right" />
-    </div>
+    </motion.div>
   );
 }
 
 // ── Slide left info panel ─────────────────────────────────────────────────────
 function SlideInfoPanel({ tag, title, description }) {
   return (
-    <div style={{
-      position: 'absolute',
-      left: 80,
-      top: '50%',
-      transform: 'translateY(-50%)',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 20,
-      maxWidth: 420,
-      pointerEvents: 'none',
-      userSelect: 'none',
-    }}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
+      style={{
+        position: 'absolute',
+        left: 80,
+        top: '50%',
+        transform: 'translateY(-50%)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 20,
+        maxWidth: 420,
+        pointerEvents: 'none',
+        userSelect: 'none',
+      }}>
       {/* Tag pill */}
       <div style={{
         display: 'inline-flex',
@@ -282,7 +292,7 @@ function SlideInfoPanel({ tag, title, description }) {
       }}>
         {description}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -547,7 +557,16 @@ export default function App() {
             style={{ position: 'absolute', inset: 0, willChange: 'transform' }}
           >
             {hasLeftPanel ? (
-              <FullSlide leftPanel={<Slide6LeftPanel />}>
+              <FullSlide leftPanel={
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
+                  style={{ position: 'absolute', inset: 0 }}
+                >
+                  <Slide6LeftPanel />
+                </motion.div>
+              }>
                 <PhoneFrame>{phoneContent}</PhoneFrame>
               </FullSlide>
             ) : (
