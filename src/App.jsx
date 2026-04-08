@@ -321,7 +321,7 @@ function PhoneContent({ current, demo, slides }) {
 export default function App() {
   // 放在组件内，确保 demoConfig.js 热更新后 label 能同步刷新
   const DEMO_MAP = Object.fromEntries(DEMOS.map(d => [d.slide, d]));
-  const SLIDES = [0, 6, 7, 8, 9, 10, 11].map(i => ({
+  const SLIDES = [0, 2, 3, 4, 5, 6, 7].map(i => ({
     id: i,
     label: DEMO_MAP[i]?.label ?? (i === 0 ? '弹幕优化展示' : `页面 ${i + 1}`),
   }));

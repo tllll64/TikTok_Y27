@@ -17,7 +17,7 @@
 
 const DEMOS = [
   {
-    slide: 6,
+    slide: 2,
     label: '功能1 | 弹幕跟发',
     leftPanel: true,
     video: 'usecase1.mov',
@@ -62,7 +62,7 @@ const DEMOS = [
     ],
   },
   {
-    slide: 7,
+    slide: 3,
     label: '功能2 | 弹幕+1发送',
     video: 'usecase2.mov',
     avatar: 'usecase2.jpg',
@@ -106,7 +106,7 @@ const DEMOS = [
     ],
   },
   {
-    slide: 8,
+    slide: 4,
     label: '功能3 | 评论精选弹幕',
     video: 'usecase3.mov',
     avatar: 'usecase3.jpg',
@@ -152,7 +152,7 @@ const DEMOS = [
   },
 
     {
-    slide: 9,
+    slide: 5,
     label: '功能4| 聚合相同弹幕',
     video: 'usecase4.mov',
     avatar: 'usecase4.png',
@@ -201,7 +201,7 @@ const DEMOS = [
 
 
     {
-    slide: 10,
+    slide: 6,
     label: '功能5 |表情外延弹幕',
     emojiFloat: true,
     video: 'usecase5-1.mov',
@@ -250,9 +250,11 @@ const DEMOS = [
   },
 
     {
-    slide: 11,
+    slide: 7,
     label: '功能6 | 热点弹幕玩法',
     kiteDanmaku: true,
+    disableCounter: true,
+    willowLeaf: true,
     video: 'usecase6.mov',
     avatar: 'usecase6.jpg',
     username: '@子扬ZYang',
