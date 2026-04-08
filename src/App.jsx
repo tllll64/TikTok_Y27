@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import TikTokHome from './TikTokHome';
 import phoneBezel from './assets/figma/phone-bezel.png';
+import tiktokLogo from './assets/figma/tiktok-logo.png';
 import slide6TooltipImg from './assets/figma/6d097609b258bdc99e1d20a9c4a1650bd265a6d7.png';
 import slide6LineImg from './assets/figma/9bfd7f9a50fa089902aaea3ceeeb3b2cf615f0ac.svg';
 import DEMOS from './demoConfig';
@@ -344,18 +345,19 @@ function SlideNav({ current, onSelect, slides }) {
 }
 
 function PhoneContent({ current, demo, slides }) {
-  if (current === 0) return <TikTokHome key="slide-0" />;
   if (demo) {
     return (
       <TikTokHome
         key={`slide-${current}`}
-        videoSrc={videoAsset(demo.video)}
+        videoSrc={demo.video ? videoAsset(demo.video) : null}
         avatarSrc={avatarAsset(demo.avatar)}
         username={demo.username}
         description={demo.description}
         captionOffset={demo.captionOffset ?? 0}
         presetDanmakus={demo.danmakus ?? []}
         bgTexts={demo.bgTexts}
+        bgColor={demo.bgColor}
+        centerLogo={demo.centerLogo ? tiktokLogo : undefined}
         videoFit={demo.videoFit ?? 'cover'}
         videoScale={demo.videoScale ?? 1}
         videoOffsetY={demo.videoOffsetY ?? 0}

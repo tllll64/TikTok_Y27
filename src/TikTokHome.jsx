@@ -1594,7 +1594,7 @@ function KiteDanmakuEffect({ triggerText }) {
 }
 
 // --- Main Page Component ---
-export default function TikTokHome({ className, videoSrc, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0, syncRows = false, emojiFloat = false, kiteDanmaku = false, disableCounter = false, willowLeaf = false }) {
+export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0, syncRows = false, emojiFloat = false, kiteDanmaku = false, disableCounter = false, willowLeaf = false }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
@@ -1710,27 +1710,50 @@ export default function TikTokHome({ className, videoSrc, username, description,
         if (danmakuPopup) dismissPopup();
       }}
     >
-      {/* Background video */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-        ...(videoScale !== 1 || videoOffsetY !== 0 ? {
-          transform: `${videoOffsetY !== 0 ? `translateY(${videoOffsetY}px) ` : ''}scale(${videoScale})`,
-          transformOrigin: 'center center',
-        } : {}),
-      }}>
-        <video
-          ref={videoRef}
-          className="absolute pointer-events-none"
-          style={videoFit === 'contain-top'
-            ? { top: '50%', left: 0, width: '100%', height: 'auto', transform: 'translateY(calc(-50% - 32px))', display: 'block' }
-            : { top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-          src={videoSrc || bgVideo}
-          autoPlay
-          loop
-          muted={muted}
-          playsInline
+      {/* Background */}
+      {bgColor ? (
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: bgColor }} />
+      ) : (
+        <div style={{
+          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+          ...(videoScale !== 1 || videoOffsetY !== 0 ? {
+            transform: `${videoOffsetY !== 0 ? `translateY(${videoOffsetY}px) ` : ''}scale(${videoScale})`,
+            transformOrigin: 'center center',
+          } : {}),
+        }}>
+          <video
+            ref={videoRef}
+            className="absolute pointer-events-none"
+            style={videoFit === 'contain-top'
+              ? { top: '50%', left: 0, width: '100%', height: 'auto', transform: 'translateY(calc(-50% - 32px))', display: 'block' }
+              : { top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+            src={videoSrc || bgVideo}
+            autoPlay
+            loop
+            muted={muted}
+            playsInline
+          />
+        </div>
+      )}
+
+      {/* Center logo */}
+      {centerLogo && (
+        <img
+          src={centerLogo}
+          alt=""
+          draggable={false}
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 130,
+            opacity: 0.18,
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }}
         />
-      </div>
+      )}
 
       {/* Mute toggle button */}
       {!danmakuOpen && <div
