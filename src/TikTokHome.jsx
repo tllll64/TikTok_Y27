@@ -1224,11 +1224,8 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
       entry = { key: `u-${u.id}`, text: u.text, isUser: !u.isPreset, origId: u.id, baseCount, isPlusOne: u.isPlusOne ?? false, featured: u.featured ?? false, replies: u.replies ?? 0, firedAt: now };
     } else {
       const pool = bgTexts ?? BG_TEXTS[rowIndex];
-      // 过滤掉用户已通过 +1 发送过的文本，避免后续循环中重复出现
-      const filteredPool = plusOneSent?.size > 0 ? pool.filter(t => !plusOneSent.has(t)) : pool;
-      // pool 被完全过滤时停止该行发射
-      if (filteredPool.length === 0) return;
-      const txt = filteredPool[bgIndex.current % filteredPool.length];
+      if (pool.length === 0) return;
+      const txt = pool[bgIndex.current % pool.length];
       bgIndex.current++;
       entry = { key: `bg-${rowIndex}-${now}`, text: txt, isUser: false, baseCount, isPlusOne: false, firedAt: now };
     }

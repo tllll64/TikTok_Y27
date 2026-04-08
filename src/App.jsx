@@ -485,18 +485,13 @@ function FigmaSlide() {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       overflow: 'hidden',
     }}>
-      {/* 80% scaled container */}
-      <div style={{
-        width: '64vw', height: '80vh',
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-      }}>
-        {/* Figma iframe */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
-          style={{ flex: 1, width: '100%', minHeight: 0, position: 'relative' }}
-        >
+      {/* Figma iframe — centered, no tag */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
+        style={{ width: '64vw', height: '80vh', position: 'relative' }}
+      >
           <iframe
             src={FIGMA_EMBED_URL}
             onLoad={() => setIframeLoaded(true)}
@@ -524,32 +519,7 @@ function FigmaSlide() {
               color: 'rgba(255,255,255,0.35)',
             }}>等待内容加载</span>
           </motion.div>
-        </motion.div>
-
-        {/* Tag */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.32, ease: 'easeOut' }}
-          style={{
-            flexShrink: 0,
-            paddingTop: 20,
-            display: 'flex', alignItems: 'center', gap: 10,
-          }}
-        >
-          <div style={{
-            display: 'inline-flex', alignItems: 'center',
-            padding: '5px 14px',
-            border: '1.5px solid rgba(255,255,255,0.4)',
-            borderRadius: 20,
-          }}>
-            <span style={{
-              fontFamily: '"PingFang SC", sans-serif',
-              fontSize: 13, fontWeight: 400, color: '#fff',
-            }}>设计说明文档</span>
-          </div>
-        </motion.div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -589,16 +559,17 @@ export default function App() {
     const idx    = slides.findIndex(s => s.id === currentRef.current);
     const next   = idx + dir;
     if (next < 0 || next >= slides.length) { scrollAccRef.current = 0; return; }
-    lockRef.current    = true;
-    scrollAccRef.current = 0;
+    lockRef.current = true;
+    // 导航后将累积量设为反向缓冲，防止 lock 解除后残余动量立即再次触发
+    scrollAccRef.current = dir > 0 ? -30 : 30;
     setDirection(dir);
     setCurrent(slides[next].id);
-    setTimeout(() => { lockRef.current = false; }, 600);
+    setTimeout(() => { lockRef.current = false; scrollAccRef.current = 0; }, 900);
   }
 
   // Wheel / trackpad scroll listener
   useEffect(() => {
-    const THRESHOLD = 50;
+    const THRESHOLD = 120; // 提高阈值，避免鼠标滚轮单次触发双翻页
     const onWheel = (e) => {
       e.preventDefault();
       if (lockRef.current) { scrollAccRef.current = 0; return; }
