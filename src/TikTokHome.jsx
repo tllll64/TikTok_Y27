@@ -1280,7 +1280,7 @@ function DanmakuRowTrack({ rowIndex, top, pendingUser, onUserEnd, activeKey, onI
   }
 
   return (
-    <div style={{ position: 'absolute', top, left: 0, width: 390, height: 25, overflow: 'hidden' }}>
+    <div style={{ position: 'absolute', top, left: 0, width: 390, height: 28 }}>
       {active.map(item => (
         <DanmakuItem
           key={item.key}
@@ -1447,64 +1447,83 @@ function DanmakuOverlay({ userDanmakus = [], onRemove, activeKey, onItemClick, l
 // --- Emoji Float Effect ---
 // Sizes follow a bell curve: largest near horizontal center (~162px), smallest at edges.
 // x is calculated so each item's center stays at its intended position.
-const EMOJI_FLOAT_ITEMS = [
-  { x: 19,  size: 44, riseDelay: 0,    targetY: 480, fadeOrder: 2 },  // far left  → small
-  { x: 86,  size: 66, riseDelay: 0.45, targetY: 330, fadeOrder: 0 },  // near center → large
-  { x: 155, size: 73, riseDelay: 0.85, targetY: 530, fadeOrder: 3 },  // near center → large
-  { x: 49,  size: 57, riseDelay: 0.2,  targetY: 400, fadeOrder: 1 },  // left-mid  → medium
-  { x: 229, size: 52, riseDelay: 1.05, targetY: 365, fadeOrder: 4 },  // right-mid → medium
-  { x: 266, size: 43, riseDelay: 0.65, targetY: 575, fadeOrder: 5 },  // far right → small
-  { x: 111, size: 80, riseDelay: 1.25, targetY: 440, fadeOrder: 6 },  // center    → largest
+// 抛掷表情：从用户发送的弹幕位置（右侧弹幕轨道）以自然抛物线掷向视频中央
+// 起点：右侧弹幕区 (x≈355, y≈140)
+// 终点：视频中央 (x≈195, y≈400)
+const THROW_SX = 355;
+const THROW_SY = 140;
+const THROW_EX = 195;
+const THROW_EY = 400;
+
+const EMOJI_THROW_ITEMS = [
+  { delay: 0,    ox:  0, oy:  0, size: 54 },
+  { delay: 0.13, ox: 12, oy: -8, size: 48 },
+  { delay: 0.25, ox: -8, oy:  5, size: 56 },
+  { delay: 0.36, ox: 18, oy:  3, size: 46 },
+  { delay: 0.46, ox: -5, oy: -5, size: 52 },
+  { delay: 0.55, ox: 10, oy:  8, size: 48 },
+  { delay: 0.63, ox: -3, oy: -3, size: 50 },
 ];
 
-function EmojiFloatItem({ x, size, riseDelay, targetY, fadeOrder, fading }) {
+function EmojiThrowItem({ delay, ox, oy, size }) {
+  const sx = THROW_SX + ox;
+  const sy = THROW_SY + oy;
+  const ex = THROW_EX + ox * 0.3;
+  const ey = THROW_EY + oy * 0.3;
+
+  // 抛物线中间控制点：起终点连线中段，略向上弧出形成自然抛物线
+  const midX = (sx + ex) / 2;
+  const midY = (sy + ey) / 2 - 80; // 向上凸起 80px
+
   return (
     <motion.img
       src={_imgEmojiFloat}
       alt=""
       style={{
         position: 'absolute',
-        left: x,
+        left: sx,
+        top: sy,
         width: size,
         height: size,
         pointerEvents: 'none',
         userSelect: 'none',
       }}
-      initial={{ y: 870, opacity: 0 }}
-      animate={fading
-        ? { y: targetY, opacity: 0 }
-        : { y: targetY, opacity: 1 }}
-      transition={fading
-        ? { y: { duration: 0 }, opacity: { duration: 0.4, delay: fadeOrder * 0.13 } }
-        : {
-            y: { duration: 1.3, delay: riseDelay, ease: [0.25, 0.46, 0.45, 0.94] },
-            opacity: { duration: 0.4, delay: riseDelay },
-          }}
+      initial={{ x: 0, y: 0, opacity: 0, scale: 0.5 }}
+      animate={{
+        x: [0, midX - sx, ex - sx],
+        y: [0, midY - sy, ey - sy],
+        opacity: [0, 0.9, 1, 0],
+        scale: [0.5, 1.0, 0.85, 0.5],
+      }}
+      transition={{
+        duration: 0.9,
+        delay,
+        ease: 'easeOut',
+        times: [0, 0.3, 0.72, 1],
+      }}
     />
   );
 }
 
 function EmojiFloatEffect({ triggerKey }) {
-  const [active, setActive] = useState(false);
-  const [fading, setFading] = useState(false);
+  const [instances, setInstances] = useState([]);
   const prevKeyRef = useRef(triggerKey);
 
   useEffect(() => {
     if (triggerKey === prevKeyRef.current) return;
     prevKeyRef.current = triggerKey;
-    setActive(true);
-    setFading(false);
-    const t1 = setTimeout(() => setFading(true), 2600);
-    const t2 = setTimeout(() => setActive(false), 4400);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    const id = Date.now();
+    setInstances(prev => [...prev, id]);
+    setTimeout(() => setInstances(prev => prev.filter(x => x !== id)), 2400);
   }, [triggerKey]);
 
-  if (!active) return null;
   return (
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 20 }}>
-      {EMOJI_FLOAT_ITEMS.map((item, i) => (
-        <EmojiFloatItem key={i} {...item} fading={fading} />
-      ))}
+      {instances.flatMap(id =>
+        EMOJI_THROW_ITEMS.map((item, i) => (
+          <EmojiThrowItem key={`${id}-${i}`} {...item} />
+        ))
+      )}
     </div>
   );
 }
@@ -1833,7 +1852,10 @@ function ReplyPanel({ danmakuText, repliesCount, onClose, initialTab }) {
 
         {/* ── 评论 tab — mock 图片 ── */}
         {activeTab === 'comment' && (
-          <img src={imgCommentMock} alt="" style={{ width: '100%', display: 'block' }} />
+          <div style={{ position: 'relative' }}>
+            <img src={imgCommentMock} alt="" style={{ width: '100%', display: 'block' }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 72, background: '#fff' }} />
+          </div>
         )}
 
         {/* ── 精选弹幕 tab ── */}
@@ -1939,7 +1961,31 @@ function ReplyPanel({ danmakuText, repliesCount, onClose, initialTab }) {
         ))}
       </div>
 
-      {/* Input bar — 仅精选弹幕 tab 显示 */}
+      {/* Input bar — 评论 tab */}
+      <div style={{
+        display: activeTab === 'comment' ? 'flex' : 'none',
+        height: 56,
+        flexShrink: 0,
+        borderTop: '0.5px solid rgba(22,24,35,0.12)',
+        background: '#fff',
+        alignItems: 'center',
+        padding: '0 12px', gap: 12,
+      }}>
+        <div style={{
+          flex: 1, height: 40,
+          background: 'rgba(22,24,35,0.05)',
+          borderRadius: 22,
+          display: 'flex', alignItems: 'center',
+          paddingLeft: 12, paddingRight: 12, gap: 8,
+        }}>
+          <span style={{ ...KF, fontSize: 15, fontWeight: 400, color: 'rgba(22,24,35,0.6)', flex: 1 }}>
+            发送一条友好评论吧
+          </span>
+          <img src={imgEmojiIcon} alt="" style={{ width: 24, height: 24, opacity: 0.5, flexShrink: 0 }} />
+        </div>
+      </div>
+
+      {/* Input bar — 精选弹幕 tab */}
       <div style={{
         display: activeTab === 'comment' ? 'none' : 'flex',
         height: 56,
@@ -1957,7 +2003,7 @@ function ReplyPanel({ danmakuText, repliesCount, onClose, initialTab }) {
           paddingLeft: 12, paddingRight: 12, gap: 8,
         }}>
           <span style={{ ...KF, fontSize: 15, fontWeight: 400, color: 'rgba(22,24,35,0.6)', flex: 1 }}>
-              回复弹幕，立即发送弹幕
+              回复弹幕，同步发送至弹幕区
           </span>
           <img src={imgEmojiIcon} alt="" style={{ width: 24, height: 24, opacity: 0.5, flexShrink: 0 }} />
         </div>

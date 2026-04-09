@@ -28,7 +28,7 @@ const DEMOS = [
     info: {
       tag: '💡 请在右侧试玩',
       title: '弹幕玩法说明',
-      description: '1. 点击某条弹幕，点赞或者跟发这条弹幕\n2. 点击发弹幕按钮，用键盘打出弹幕内容，点击发送',
+      description: '1. 点击某条弹幕，点赞或跟发这条弹幕\n2. 点击发弹幕按钮，用键盘打出弹幕内容，点击发送',
     },
     annotations: [
       { text: '弹幕区域', side: 'right', yInPhone: 135 },
@@ -65,7 +65,7 @@ const DEMOS = [
     slide: 2,
     label: '功能1 | 跟发弹幕',
     info: {
-      tag: '功能 1',
+      tag: 'O1 发送渗透',
       title: '跟发弹幕，\n基于已有的优质表达快速二创',
       description: '点击弹幕，tooltip 中新增 “跟发” 功能，聚合复制粘贴效果。\n点击后，弹幕文本快速复制到弹幕面板输入框中。',
     },
@@ -119,7 +119,7 @@ const DEMOS = [
     slide: 3,
     label: '功能2 | 弹幕+1发送',
     info: {
-      tag: '功能 2',
+      tag: 'O1 发送渗透',
       title: '高频弹幕+1，\n即时表达认同，营造在场感',
       description: '+1 弹幕的样式与发送后样式类似，视觉隐喻吸引点击。\n点击后，原地展现为已发送样式。',
     },
@@ -162,9 +162,9 @@ const DEMOS = [
     slide: 4,
     label: '功能3 | 评论精选弹幕',
     info: {
-      tag: '功能 3',
+      tag: 'O1 发送渗透',
       title: '评论精选弹幕，\n还原最熟悉的互动方式',
-      description: '精选弹幕外露回复按钮，可跳转至弹幕面板查看。\n弹幕回复后，回复内容同步发送至弹幕区，达成渗透。',
+      description: '沉淀精选弹幕至面板，鼓励用户评论互动\n评论弹幕后，内容同步发送至弹幕区域。',
     },
     disableCounter: true,
     annotations: [
@@ -217,7 +217,7 @@ const DEMOS = [
     slide: 5,
     label: '功能4 | 聚合相同弹幕',
     info: {
-      tag: '功能 4',
+      tag: 'O2 形式贴合生态',
       title: '聚合相同弹幕，\n用数据传递情绪共振',
       description: '在开放式偏好表达的内容场景下，\n通过对相同弹幕聚合计数，让用户清晰感知同频观点的热度。',
     },
@@ -274,9 +274,9 @@ const DEMOS = [
     slide: 6,
     label: '功能5 |表情外延弹幕',
     info: {
-      tag: '功能 5',
+      tag: 'O2 形式贴合生态',
       title: '表情外延文字，\n放大集群式情绪',
-      description: '引入更直观、更具冲击力的表情元素，通过满屏飘起的视觉效果递进情绪，放大用户的认同、期望、肯定等主观感受。',
+      description: '引入更直观的表情元素，通过抛物线投掷的视觉效果递进情绪，进一步放大用户对内容的认同、期望、肯定等主观感受。',
     },
     annotations: [
       { text: '试着发送"接接接"', side: 'left', yInPhone: 675 },
@@ -332,9 +332,9 @@ const DEMOS = [
     slide: 7,
     label: '功能6 | 热点弹幕玩法',
     info: {
-      tag: '功能 6',
+      tag: 'O2 形式贴合生态',
       title: '衔接当下热点，\n为弹幕发送注入丰富内涵',
-      description: '在节日、热点等强情绪节点，视频内容深度与表达意愿升级。\n对发送形态做差异化设计，提升弹幕发声的有用性。',
+      description: '在节日、热点实事等内容场景下，视频内容深度与表达意愿升级。\n对发送形态做差异化设计，提升弹幕发声的有用性。',
     },
     kiteDanmaku: true,
     disableCounter: true,
