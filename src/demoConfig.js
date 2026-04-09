@@ -164,7 +164,7 @@ const DEMOS = [
     info: {
       tag: 'O1 发送渗透',
       title: '评论精选弹幕，\n还原最熟悉的互动方式',
-      description: '沉淀精选弹幕至面板，鼓励用户评论互动\n评论弹幕后，内容同步发送至弹幕区域。',
+      description: '沉淀精选弹幕至面板，鼓励用户评论互动。\n评论弹幕后，内容同步发送至弹幕区域。',
     },
     disableCounter: true,
     annotations: [
