@@ -475,7 +475,7 @@ function PhoneContent({ current, demo, slides }) {
 
 // ── Figma embed slide ─────────────────────────────────────────────────────────
 const FIGMA_EMBED_URL = 'https://www.figma.com/embed?embed_host=share&url=' +
-  encodeURIComponent('https://www.figma.com/proto/H9iUsuS0iyuVoEVjVb2KIU/Y27-TikTok?page-id=0%3A1%3Fnode-id%3D0-1&p=f&viewport=476%2C40%2C0.04&t=3voUGtoBAIVez1pO-1&scaling=scale-down-width&content-scaling=fixed&node-id=47-2422');
+  encodeURIComponent('https://www.figma.com/proto/H9iUsuS0iyuVoEVjVb2KIU/Y27-TikTok?page-id=0%3A1%3Fnode-id%3D0-1&p=f&viewport=476%2C40%2C0.04&t=3voUGtoBAIVez1pO-1&scaling=scale-down&content-scaling=fixed&node-id=47-2422');
 
 function FigmaSlide() {
   const [iframeLoaded, setIframeLoaded] = useState(false);

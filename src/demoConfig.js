@@ -169,6 +169,7 @@ const DEMOS = [
     disableCounter: true,
     annotations: [
       { text: '查看精选弹幕回复', side: 'right', yInPhone: 135 },
+      { text: '新增精选弹幕', side: 'right', yInPhone: 492 },
     ],
     video: 'https://g7wxjm6ewnwsi0wp.public.blob.vercel-storage.com/videos/usecase3.mov',
     avatar: 'usecase3.jpg',
