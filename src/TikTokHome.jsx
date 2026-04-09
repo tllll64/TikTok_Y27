@@ -33,6 +33,7 @@ import _imgReplyXinyifan from './assets/figma/reply-avatar-xinyifan.png';
 import _imgReplyXiaoshi from './assets/figma/reply-avatar-xiaoshi.png';
 import _imgReplyPapi from './assets/figma/reply-avatar-papi.png';
 import _imgReplyXiaoxi from './assets/figma/reply-avatar-xiaoxi.png';
+import _imgCommentMock from './assets/figma/comment-mock.jpg';
 import _imgSearch from './assets/figma/053df630afa80cf14d5f67f1bf24eb0e7b8ace79.svg';
 import _imgMusic from './assets/figma/1cacb78552ad185b8eaa0f495dbaa923f41526a8.svg';
 import _imgComment from './assets/figma/a2f984a7878475b42f21e52d86a00b8e65ec3e09.svg';
@@ -92,6 +93,7 @@ const imgReplyXinyifan = _imgReplyXinyifan;
 const imgReplyXiaoshi = _imgReplyXiaoshi;
 const imgReplyPapi = _imgReplyPapi;
 const imgReplyXiaoxi = _imgReplyXiaoxi;
+const imgCommentMock = _imgCommentMock;
 const imgSearch = _imgSearch;
 const imgMusic = _imgMusic;
 const imgComment = _imgComment;
@@ -333,7 +335,7 @@ function TopNav() {
 }
 
 // Right action panel (like, comment, collect, share, music, avatar)
-function ActionPanel({ avatarSrc }) {
+function ActionPanel({ avatarSrc, onCommentClick }) {
   return (
     <div className="absolute h-[400px] left-[333px] top-[349px] w-[56px]">
       {/* Avatar */}
@@ -376,7 +378,9 @@ function ActionPanel({ avatarSrc }) {
       </p>
 
       {/* Comment icon */}
-      <div className="absolute left-1/2 -translate-x-1/2 overflow-clip size-[36px] top-[143px]">
+      <div className="absolute left-1/2 -translate-x-1/2 overflow-clip size-[36px] top-[143px]"
+           style={{ cursor: onCommentClick ? 'pointer' : 'default' }}
+           onClick={e => { if (onCommentClick) { e.stopPropagation(); onCommentClick(); } }}>
         <img alt="" className="absolute block max-w-none size-full" src={imgComment} />
       </div>
       {/* Comment count */}
@@ -1705,14 +1709,16 @@ function KiteDanmakuEffect({ triggerText }) {
 }
 
 // --- 弹幕回复面板 — Figma 148:5422 "评论 - 7分屏浮层面板" ---
-function ReplyPanel({ danmakuText, repliesCount, onClose }) {
+function ReplyPanel({ danmakuText, repliesCount, onClose, initialTab }) {
   const KF = { fontFamily: '"PingFang SC", sans-serif' };
   const [highlighted, setHighlighted] = useState(true);
+  const [activeTab, setActiveTab] = useState(initialTab ?? 'danmaku'); // 'danmaku' | 'comment'
 
   useEffect(() => {
     const t = setTimeout(() => setHighlighted(false), 1500);
     return () => clearTimeout(t);
   }, []);
+
 
   // 根据精选弹幕内容生成样本回复 (Figma 中的三条评论)
   const sampleReplies = [
@@ -1796,24 +1802,42 @@ function ReplyPanel({ danmakuText, repliesCount, onClose }) {
         </div>
       </div>
 
-      {/* Tab bar — 评论 | 弹幕(selected) */}
+      {/* Tab bar */}
       <div style={{
         height: 40, flexShrink: 0,
         display: 'flex', alignItems: 'flex-end',
         paddingLeft: 12, gap: 24,
         borderBottom: '0.5px solid rgba(22,24,35,0.12)',
       }}>
-        <div style={{ paddingBottom: 10, cursor: 'pointer' }}>
-          <span style={{ ...KF, fontSize: 14, fontWeight: 400, color: 'rgba(22,24,35,0.6)' }}>评论 2045</span>
-        </div>
-        <div style={{ paddingBottom: 8, borderBottom: '2px solid #161823', cursor: 'pointer' }}>
-          <span style={{ ...KF, fontSize: 14, fontWeight: 500, color: '#161823' }}>弹幕 {repliesCount}</span>
-        </div>
+        {[
+          { key: 'comment', label: '评论 1009' },
+          { key: 'danmaku', label: `精选弹幕 ${repliesCount}` },
+        ].map(tab => {
+          const isActive = activeTab === tab.key;
+          return (
+            <div
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              style={{ paddingBottom: isActive ? 8 : 10, borderBottom: isActive ? '2px solid #161823' : 'none', cursor: 'pointer' }}
+            >
+              <span style={{ ...KF, fontSize: 14, fontWeight: isActive ? 500 : 400, color: isActive ? '#161823' : 'rgba(22,24,35,0.6)' }}>
+                {tab.label}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Reply list (scrollable) */}
+      {/* Content list (scrollable) */}
       <div className="reply-list" style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', scrollbarWidth: 'none' }}>
-        {sampleReplies.map(reply => (
+
+        {/* ── 评论 tab — mock 图片 ── */}
+        {activeTab === 'comment' && (
+          <img src={imgCommentMock} alt="" style={{ width: '100%', display: 'block' }} />
+        )}
+
+        {/* ── 精选弹幕 tab ── */}
+        {activeTab === 'danmaku' && sampleReplies.map(reply => (
           <div key={reply.id}>
             {/* 一级评论行 */}
             <div
@@ -1915,13 +1939,15 @@ function ReplyPanel({ danmakuText, repliesCount, onClose }) {
         ))}
       </div>
 
-      {/* Input bar — 56px (Figma 148:5589) */}
+      {/* Input bar — 仅精选弹幕 tab 显示 */}
       <div style={{
-        height: 56, flexShrink: 0,
+        display: activeTab === 'comment' ? 'none' : 'flex',
+        height: 56,
+        flexShrink: 0,
         borderTop: '0.5px solid rgba(22,24,35,0.12)',
         background: '#fff',
-        display: 'flex', alignItems: 'center',
-        padding: '0 12px',
+        alignItems: 'center',
+        padding: '0 12px', gap: 12,
       }}>
         <div style={{
           flex: 1, height: 40,
@@ -1931,7 +1957,7 @@ function ReplyPanel({ danmakuText, repliesCount, onClose }) {
           paddingLeft: 12, paddingRight: 12, gap: 8,
         }}>
           <span style={{ ...KF, fontSize: 15, fontWeight: 400, color: 'rgba(22,24,35,0.6)', flex: 1 }}>
-            回复弹幕，立即发送弹幕
+              回复弹幕，立即发送弹幕
           </span>
           <img src={imgEmojiIcon} alt="" style={{ width: 24, height: 24, opacity: 0.5, flexShrink: 0 }} />
         </div>
@@ -1950,7 +1976,7 @@ function ReplyPanel({ danmakuText, repliesCount, onClose }) {
 }
 
 // --- Main Page Component ---
-export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0, syncRows = false, emojiFloat = false, kiteDanmaku = false, disableCounter = false, willowLeaf = false }) {
+export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, username, description, avatarSrc, captionOffset = 0, presetDanmakus = [], bgTexts, videoFit = 'cover', videoScale = 1, videoOffsetY = 0, plusOneTextSet, disclaimerMaskHeight = 0, syncRows = false, emojiFloat = false, kiteDanmaku = false, disableCounter = false, willowLeaf = false, onCommentBtnClick }) {
   const [danmakuOpen, setDanmakuOpen] = useState(false);
   const [danmakuOn, setDanmakuOn] = useState(true);
   const [muted, setMuted] = useState(true);
@@ -1970,6 +1996,7 @@ export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, u
   const [danmakuDimmed, setDanmakuDimmed] = useState(false);
   const [replyPanelOpen, setReplyPanelOpen] = useState(false);
   const [replyPanelData, setReplyPanelData] = useState(null); // { text, replies }
+  const [replyPanelInitialTab, setReplyPanelInitialTab] = useState('danmaku');
 
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -2056,7 +2083,15 @@ export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, u
   }
 
   function handleRepliesClick(text, replies) {
+    setReplyPanelInitialTab('danmaku');
     setReplyPanelData({ text, replies });
+    setReplyPanelOpen(true);
+  }
+
+  function handleCommentBtnClick() {
+    const featuredDanmaku = presetDanmakus.find(d => d.featured);
+    setReplyPanelInitialTab('comment');
+    setReplyPanelData({ text: featuredDanmaku?.text ?? '', replies: featuredDanmaku?.replies ?? 0 });
     setReplyPanelOpen(true);
   }
 
@@ -2254,7 +2289,7 @@ export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, u
       )}
 
       {/* Right action panel */}
-      <ActionPanel avatarSrc={avatarSrc} />
+      <ActionPanel avatarSrc={avatarSrc} onCommentClick={onCommentBtnClick ? handleCommentBtnClick : undefined} />
 
       {/* Caption (username + description) */}
       <Caption username={username} description={description} topOffset={captionOffset} />
@@ -2285,6 +2320,7 @@ export default function TikTokHome({ className, videoSrc, bgColor, centerLogo, u
             danmakuText={replyPanelData.text}
             repliesCount={replyPanelData.replies}
             onClose={() => setReplyPanelOpen(false)}
+            initialTab={replyPanelInitialTab}
           />
         )}
       </AnimatePresence>

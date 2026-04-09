@@ -28,7 +28,7 @@ const DEMOS = [
     info: {
       tag: '💡 请在右侧试玩',
       title: '弹幕玩法说明',
-      description: '1. 点击某条弹幕，点赞、跟发或回复这条弹幕\n2. 点击发弹幕按钮，用键盘打出弹幕内容，点击发送',
+      description: '1. 点击某条弹幕，点赞或者跟发这条弹幕\n2. 点击发弹幕按钮，用键盘打出弹幕内容，点击发送',
     },
     annotations: [
       { text: '弹幕区域', side: 'right', yInPhone: 135 },

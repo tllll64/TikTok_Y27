@@ -455,6 +455,7 @@ function PhoneContent({ current, demo, slides }) {
         kiteDanmaku={demo.kiteDanmaku ?? false}
         disableCounter={demo.disableCounter ?? false}
         willowLeaf={demo.willowLeaf ?? false}
+        onCommentBtnClick={demo.slide === 4 ? true : undefined}
       />
     );
   }
