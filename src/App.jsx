@@ -538,9 +538,10 @@ const SLIDE_TRANSITION = {
 };
 
 function useIsPortrait() {
-  const [portrait, setPortrait] = useState(() => window.innerHeight > window.innerWidth);
+  const check = () => window.innerWidth / window.innerHeight < 1.3;
+  const [portrait, setPortrait] = useState(check);
   useEffect(() => {
-    const update = () => setPortrait(window.innerHeight > window.innerWidth);
+    const update = () => setPortrait(check());
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
   }, []);
