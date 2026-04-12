@@ -305,7 +305,7 @@ function SlideInfoPanel({ tag, title, description }) {
 const PANEL_PHONE_GAP = 60;
 const LEFT_PANEL_CLIP = 880; // reference px — trims empty space right of content
 
-function FullSlide({ leftPanel, children }) {
+function FullSlide({ leftPanel, children, isPortrait }) {
   const [panelScale, setPanelScale] = useState(1);
 
   useEffect(() => {
@@ -331,22 +331,24 @@ function FullSlide({ leftPanel, children }) {
       width: '100vw', height: '100vh',
       background: '#000',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      gap: PANEL_PHONE_GAP,
+      gap: isPortrait ? 0 : PANEL_PHONE_GAP,
       overflow: 'hidden',
       position: 'relative',
     }}>
-      {/* Left panel — clipped to LEFT_PANEL_CLIP so the pair centres correctly */}
-      <div style={{
-        width: scaledW, height: scaledH,
-        position: 'relative', overflow: 'hidden', flexShrink: 0,
-      }}>
+      {/* Left panel — hidden in portrait mode */}
+      {!isPortrait && (
         <div style={{
-          position: 'absolute', width: PHONE_LEFT, height: SLIDE_H,
-          transform: `scale(${panelScale})`, transformOrigin: 'top left',
+          width: scaledW, height: scaledH,
+          position: 'relative', overflow: 'hidden', flexShrink: 0,
         }}>
-          {leftPanel}
+          <div style={{
+            position: 'absolute', width: PHONE_LEFT, height: SLIDE_H,
+            transform: `scale(${panelScale})`, transformOrigin: 'top left',
+          }}>
+            {leftPanel}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Phone at scaled size */}
       <div style={{ flexShrink: 0, width: BEZEL_W * PHONE_SCALE, height: BEZEL_H * PHONE_SCALE }}>
@@ -535,6 +537,16 @@ const SLIDE_TRANSITION = {
   y: { type: 'tween', duration: 0.48, ease: [0.32, 0.72, 0, 1] },
 };
 
+function useIsPortrait() {
+  const [portrait, setPortrait] = useState(() => window.innerHeight > window.innerWidth);
+  useEffect(() => {
+    const update = () => setPortrait(window.innerHeight > window.innerWidth);
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+  return portrait;
+}
+
 export default function App() {
   // 放在组件内，确保 demoConfig.js 热更新后 label 能同步刷新
   const DEMO_MAP = Object.fromEntries(DEMOS.map(d => [d.slide, d]));
@@ -595,6 +607,7 @@ export default function App() {
     setTimeout(() => { lockRef.current = false; }, 600);
   }
 
+  const isPortrait   = useIsPortrait();
   const isFigmaSlide = current === 1;
   const demo         = DEMO_MAP[current];
   const hasLeftPanel = demo?.leftPanel === true;
@@ -618,7 +631,7 @@ export default function App() {
             {isFigmaSlide ? (
               <FigmaSlide />
             ) : hasLeftPanel ? (
-              <FullSlide leftPanel={
+              <FullSlide isPortrait={isPortrait} leftPanel={
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -633,12 +646,13 @@ export default function App() {
             ) : (
               <div style={{
                 width: '100vw', height: '100vh', background: '#111',
-                display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-                paddingRight: `calc(33.33vw - ${Math.round(BEZEL_W * PHONE_SCALE / 2)}px)`,
+                display: 'flex', alignItems: 'center',
+                justifyContent: isPortrait ? 'center' : 'flex-end',
+                paddingRight: isPortrait ? 0 : `calc(33.33vw - ${Math.round(BEZEL_W * PHONE_SCALE / 2)}px)`,
                 position: 'relative',
                 overflow: 'hidden',
               }}>
-                {demo?.info && (
+                {!isPortrait && demo?.info && (
                   <SlideInfoPanel
                     tag={demo.info.tag}
                     title={demo.info.title}
