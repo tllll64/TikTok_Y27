@@ -335,7 +335,7 @@ const DEMOS = [
     info: {
       tag: 'O2 形式贴合生态',
       title: '衔接当下热点，\n为弹幕发送注入丰富内涵',
-      description: '在节日、热点实事等内容场景下，视频内容深度与表达意愿升级。\n对发送形态做差异化设计，提升弹幕发声的有用性。',
+      description: '在节日、热点实事等内容场景下，内容深度与表达意愿升级。\n对发送形态做差异化设计，提升弹幕发声的有用性。',
     },
     kiteDanmaku: true,
     disableCounter: true,
